@@ -1,20 +1,15 @@
-// import { UserStatus } from "@prisma/client";
-import * as bcrypt from "bcrypt";
-import crypto from "crypto";
-import httpStatus from "http-status";
 import { Secret } from "jsonwebtoken";
 import config from "../../../config";
-import ApiError from "../../../errors/ApiErrors";
 import { jwtHelpers } from "../../../helpars/jwtHelpers";
-import emailSender from "../../../shared/emailSender";
 import prisma from "../../../shared/prisma";
-
+import * as bcrypt from "bcrypt";
+import ApiError from "../../../errors/ApiErrors";
+import emailSender from "../../../shared/emailSender";
+import { UserStatus } from "@prisma/client";
+import httpStatus from "http-status";
+import crypto from 'crypto';
 // user login
-const loginUser = async (payload: {
-  email: string;
-  password: string;
-  fcmToken?: string;
-}) => {
+const loginUser = async (payload: { email: string; password: string }) => {
   const userData = await prisma.user.findUnique({
     where: {
       email: payload.email,
@@ -29,18 +24,11 @@ const loginUser = async (payload: {
   }
   const isCorrectPassword: boolean = await bcrypt.compare(
     payload.password,
-    userData.password 
+    userData.password
   );
 
   if (!isCorrectPassword) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Password incorrect!");
-  }
-
-  if (payload && payload.fcmToken) {
-    await prisma.user.update({
-      where: { id: userData.id },
-      data: { fcmToken: payload.fcmToken },
-    });
   }
   const accessToken = jwtHelpers.generateToken(
     {
@@ -68,37 +56,14 @@ const getMyProfile = async (userToken: string) => {
     },
     select: {
       id: true,
+      firstName: true,
+      lastName: true,
+      username: true,
       email: true,
-      name: true,
-      phoneNumber: true,
-      ethnicity: true,
-      gender: true,
-      dob: true,
-      hight: true,
-      weight: true,
-      isPayment: true,
-      planName: true,
-      fcmToken: true,
-      priceId: true,
-      subscriptionId: true,
-      sexOrientation: true,
-      education: true,
-      interest: true,
-      distance: true,
-      favoritesFood: true,
-      photos: true,
-   
-      about: true,
-      lat: true,
-      long: true,
-      isCompleteProfile: true,
+      profileImage: true,
+      // phoneNumber: true,
       createdAt: true,
       updatedAt: true,
-      tiktok: true,
-      facebook: true,
-      twitter: true,
-      instagram: true,
-      linkedin: true,
     },
   });
 
@@ -125,6 +90,7 @@ const changePassword = async (
     throw new ApiError(404, "User not found");
   }
 
+
   const isPasswordValid = await bcrypt.compare(oldPassword, user?.password);
 
   if (!isPasswordValid) {
@@ -143,7 +109,6 @@ const changePassword = async (
   });
   return { message: "Password changed successfully" };
 };
-
 const forgotPassword = async (payload: { email: string }) => {
   // Fetch user data or throw if not found
   const userData = await prisma.user.findFirstOrThrow({
@@ -182,15 +147,15 @@ const forgotPassword = async (payload: { email: string }) => {
         <div style="text-align: center; margin-top: 30px;">
             <p style="font-size: 12px; color: #999; text-align: center;">
                 Best Regards,<br/>
-                <span style="font-weight: bold; color: #3f51b5;">nathancloud Team</span><br/>
-                <a href="mailto:support@nathancloud.com" style="color: #ffffff; text-decoration: none; font-weight: bold;">Contact Support</a>
+                <span style="font-weight: bold; color: #3f51b5;">Nmbull Team</span><br/>
+                <a href="mailto:support@nmbull.com" style="color: #ffffff; text-decoration: none; font-weight: bold;">Contact Support</a>
             </p>
         </div>
     </div>
 </div> `;
 
   // Send the OTP email to the user
-  await emailSender(userData.email, html, "Forgot Password OTP");
+  await emailSender( userData.email, html,'Forgot Password OTP',);
 
   // Update the user's OTP and expiration in the database
   await prisma.user.update({
@@ -201,8 +166,10 @@ const forgotPassword = async (payload: { email: string }) => {
     },
   });
 
-  return { message: "Reset password OTP sent to your email successfully" };
+  return { message: 'Reset password OTP sent to your email successfully' };
 };
+
+
 
 const resendOtp = async (email: string) => {
   // Check if the user exists
@@ -211,7 +178,7 @@ const resendOtp = async (email: string) => {
   });
 
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, "This user is not found!");
+    throw new ApiError(httpStatus.NOT_FOUND, 'This user is not found!');
   }
 
   // Generate a new OTP
@@ -253,7 +220,7 @@ const resendOtp = async (email: string) => {
   `;
 
   // Send the OTP to user's email
-  await emailSender(user.email, html, "Resend OTP");
+  await emailSender(user.email, html, 'Resend OTP');
 
   // Update the user's profile with the new OTP and expiration
   const updatedUser = await prisma.user.update({
@@ -264,9 +231,8 @@ const resendOtp = async (email: string) => {
     },
   });
 
-  return { message: "OTP resent successfully" };
+  return { message: 'OTP resent successfully'};
 };
-
 const verifyForgotPasswordOtp = async (payload: {
   email: string;
   otp: number;
@@ -277,8 +243,9 @@ const verifyForgotPasswordOtp = async (payload: {
   });
 
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, "This user is not found!");
+    throw new ApiError(httpStatus.NOT_FOUND, 'This user is not found!');
   }
+
 
   // Check if the OTP is valid and not expired
   if (
@@ -286,7 +253,7 @@ const verifyForgotPasswordOtp = async (payload: {
     !user.expirationOtp ||
     user.expirationOtp < new Date()
   ) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Invalid OTP");
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid OTP');
   }
 
   // Update the user's OTP, OTP expiration, and verification status
@@ -295,17 +262,12 @@ const verifyForgotPasswordOtp = async (payload: {
     data: {
       otp: null, // Clear the OTP
       expirationOtp: null, // Clear the OTP expiration
-    //   status: UserStatus.ACTIVE,
     },
   });
 
-  
-  const token= await  jwtHelpers.generateToken({id: user.id,
-    email: user.email,
-    role: user.role}, config.jwt.jwt_secret as Secret, config.jwt.expires_in as string);
-
-  return { message: "OTP verification successful", token: token };
+  return { message: 'OTP verification successful' };
 };
+
 
 // reset password
 const resetPassword = async (payload: { password: string; email: string }) => {
@@ -315,7 +277,7 @@ const resetPassword = async (payload: { password: string; email: string }) => {
   });
 
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, "This user is not found!");
+    throw new ApiError(httpStatus.NOT_FOUND, 'This user is not found!');
   }
 
   // Hash the new password
@@ -331,7 +293,7 @@ const resetPassword = async (payload: { password: string; email: string }) => {
     },
   });
 
-  return { message: "Password reset successfully" };
+  return { message: 'Password reset successfully' };
 };
 export const AuthServices = {
   loginUser,
@@ -340,5 +302,5 @@ export const AuthServices = {
   forgotPassword,
   resetPassword,
   resendOtp,
-  verifyForgotPasswordOtp,
+  verifyForgotPasswordOtp
 };

@@ -19,4 +19,3 @@ const handleZodError = (err: ZodError): any => {
 };
 
 export default handleZodError;
-;

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 
-import { JwtPayload, Secret } from "jsonwebtoken";
 import config from "../../config";
+import { JwtPayload, Secret } from "jsonwebtoken";
 
 import httpStatus from "http-status";
 import ApiError from "../../errors/ApiErrors";
@@ -36,9 +36,9 @@ const auth = (...roles: string[]) => {
         throw new ApiError(httpStatus.NOT_FOUND, "User not found!");
       }
 
-    //   if (user.status === "BLOCKED") {
-    //     throw new ApiError(httpStatus.FORBIDDEN, "Your account is blocked!");
-    //   }
+      if (user.status === "BLOCKED") {
+        throw new ApiError(httpStatus.FORBIDDEN, "Your account is blocked!");
+      }
 
       req.user = verifiedUser as JwtPayload;
 

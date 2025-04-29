@@ -7,23 +7,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String?
-  email     String?  @unique
-  password  String?
-  fcmToken  String?
-  otp       String?
-  role      UserRole       @default(Customer)
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
 
-  @@map("users")
+  // username      String? @unique
+  firstName String?
+  lastName String?
+  fullName String?
+  dob DateTime?
+  email         String     @unique
+  profileImage  String?
+  expirationOtp DateTime?
+  otp           Int?
+  password      String
+  role          UserRole   @default(Customer)
+  status        UserStatus @default(ACTIVE)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@map("Users")
 }
 
 enum UserRole {
   Customer
-  provider
+  Provider
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
 }

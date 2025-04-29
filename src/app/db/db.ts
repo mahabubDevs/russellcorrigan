@@ -1,24 +1,21 @@
 import { UserRole } from "@prisma/client";
+import prisma from "../../shared/prisma";
 import * as bcrypt from "bcrypt";
 import config from "../../config";
-import prisma from "../../shared/prisma";
-
 export const initiateSuperAdmin = async () => {
-  const hashedPassword = await bcrypt.hash(
-    "123456789",
-    Number(config.bcrypt_salt_rounds)
-  );
+  const hashedPassword=await bcrypt.hash('123456789',Number(config.bcrypt_salt_rounds))
   const payload: any = {
-    email: "admin@expatglobalgroup.com",
-    phoneNumber: "1234567890",
+    fullName : "Super",
+    // username: "Admin",
+    email: "belalhossain22000@gmail.com",
+    // phoneNumber: "1234567890",
     password: hashedPassword,
-    // status: UserStatus.ACTIVE,
-    // isPayment: true,
-    // role: UserRole.ADMIN,
+    role: UserRole.Customer,
   };
 
   const isExistUser = await prisma.user.findUnique({
     where: {
+      username: payload.username,
       email: payload.email,
     },
   });
