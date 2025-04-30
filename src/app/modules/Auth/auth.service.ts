@@ -58,7 +58,7 @@ const getMyProfile = async (userToken: string) => {
       id: true,
       firstName: true,
       lastName: true,
-      username: true,
+      // username: true,
       email: true,
       profileImage: true,
       // phoneNumber: true,

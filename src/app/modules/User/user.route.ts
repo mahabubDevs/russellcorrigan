@@ -22,7 +22,7 @@ router.put(
   "/profile",
   // validateRequest(UserValidation.userUpdateSchema),
 
-  auth(UserRole.provider, UserRole.Customer),
+  auth(UserRole.Provider, UserRole.Customer),
   fileUploader.uploadSingle,
   userController.updateProfile
 );

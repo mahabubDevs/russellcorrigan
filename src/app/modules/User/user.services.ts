@@ -15,7 +15,7 @@ import { fileUploader } from "../../../helpars/fileUploader";
 const createUserIntoDb = async (payload: User) => {
   const existingUser = await prisma.user.findFirst({
     where: {
-      OR: [{ email: payload.email }, { username: payload.username }],
+      OR: [{ email: payload.email }],
     },
   });
 
@@ -166,7 +166,7 @@ const updateProfile = async (req: Request) => {
       // fullName: true,
       firstName: true,
       lastName: true,
-      username: true,
+    
       email: true,
       profileImage: true,
       dob: true,
@@ -196,7 +196,7 @@ const updateUserIntoDb = async (payload: IUser, id: string) => {
       // fullName: true,
       firstName: true,
       lastName: true,
-      username: true,
+
       email: true,
       profileImage: true,
       role: true,
