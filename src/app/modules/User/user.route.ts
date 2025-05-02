@@ -9,11 +9,24 @@ import { fileUploader } from "../../../helpars/fileUploader";
 const router = express.Router();
 
 // *!register user
+// router.post(
+//   "/register",
+//   fileUploader.uploadMultipleImage,
+//   validateRequest(UserValidation.CreateUserValidationSchema),
+//   userController.createUser
+// );
+
+
+
 router.post(
   "/register",
-  validateRequest(UserValidation.CreateUserValidationSchema),
+  fileUploader.uploadMultipleImage, // Multer middleware for handling multiple files
   userController.createUser
 );
+
+
+
+
 // *!get all  user
 router.get("/", userController.getUsers);
 

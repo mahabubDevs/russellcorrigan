@@ -10,42 +10,100 @@ import config from "../../../config";
 import httpStatus from "http-status";
 import { Request } from "express";
 import { fileUploader } from "../../../helpars/fileUploader";
+import { string } from "zod";
 
 // Create a new user in the database.
-const createUserIntoDb = async (payload: User) => {
-  const existingUser = await prisma.user.findFirst({
-    where: {
-      OR: [{ email: payload.email }],
-    },
-  });
+// const createUserIntoDb = async (payload: User ,req:Request) => {
+//   console.log("Payload:", payload);
+//   console.log("files", req.files);
+//   console.log("BODY:", req.body);
 
-  if (existingUser) {
-    if (existingUser.email === payload.email) {
-      throw new ApiError(
-        400,
-        `User with this email ${payload.email} already exists`
-      );
-    }
-    // if (existingUser.username === payload.username) {
-    //   throw new ApiError(
-    //     400,
-    //     `User with this username ${payload.username} already exists`
-    //   );
-    // }
-  }
-  const hashedPassword: string = await bcrypt.hash(
-    payload.password,
-    Number(config.bcrypt_salt_rounds)
-  );
+//   const existingUser = await prisma.user.findFirst({
+//     where: {
+//       OR: [{ email: payload.email }],
+//     },
+//   });
+
+//   if (existingUser) {
+//     if (existingUser.email === payload.email) {
+//       throw new ApiError(
+//         400,
+//         `User with this email ${payload.email} already exists`
+//       );
+//     }
+//     // if (existingUser.username === payload.username) {
+//     //   throw new ApiError(
+//     //     400,
+//     //     `User with this username ${payload.username} already exists`
+//     //   );
+//     // }
+//   }
+//   const hashedPassword: string = await bcrypt.hash(
+//     payload.password,
+//     Number(config.bcrypt_salt_rounds)
+//   );
+
+
+
+//   const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+//   console.log("Files:", files);
+//   let imageUrls: string[] = [];
+
+//   if (files?.images && files.images.length > 0) {
+//     const uploads = await Promise.all(
+//       files.images.map(async (file) => {
+//         const uploadResult = await fileUploader.uploadToCloudinary(file);
+//         return uploadResult.Location;
+//       })
+//     );
+//     imageUrls = uploads;
+//   }
+
+//   console.log("Image URLs:", imageUrls);
+
+
+
+
+//   const result = await prisma.user.create({
+//     data: { ...payload, password: hashedPassword ,images: imageUrls,},
+//     select: {
+//       id: true,
+//       firstName: true,
+//       lastName: true,
+//       phoneNumber: true,
+//       images: true,
+//       email: true,
+//       role: true,
+//       createdAt: true,
+//       updatedAt: true,
+//     },
+//   });
+
+//   return result;
+// };
+
+
+
+
+
+
+
+const createUserIntoDb = async (payload: IUser) => {
+  const hashedPassword = await bcrypt.hash(payload.password, 10);
 
   const result = await prisma.user.create({
-    data: { ...payload, password: hashedPassword },
+    data: {
+      ...payload,
+      password: hashedPassword,
+    },
     select: {
       id: true,
       firstName: true,
       lastName: true,
       email: true,
+      phoneNumber: true,
       role: true,
+      images: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -53,6 +111,8 @@ const createUserIntoDb = async (payload: User) => {
 
   return result;
 };
+
+
 
 // reterive all users from the database also searcing anf filetering
 const getUsersFromDb = async (

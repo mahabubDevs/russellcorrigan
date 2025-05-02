@@ -16,6 +16,8 @@ model User {
   fullName String?
   dob DateTime?
   email         String     @unique
+  phoneNumber         String?    
+  images         String[]
   profileImage  String?
   expirationOtp DateTime?
   otp           Int?
@@ -27,6 +29,8 @@ model User {
 
   @@map("Users")
 }
+
+
 
 enum UserRole {
   Customer

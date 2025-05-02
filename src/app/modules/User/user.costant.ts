@@ -3,7 +3,8 @@ export const userFilterableFields = [
   "searchTerm",
   "role",
   "name",
+  "phoneNumber",
   "username",
 ];
 
-export const userSearchAbleFields = ["email", "name", "username"];
+export const userSearchAbleFields = ["email", "name", "username", "phoneNumber"];
