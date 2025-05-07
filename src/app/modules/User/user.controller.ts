@@ -178,7 +178,7 @@ const updateProfile = catchAsync(async (req: Request, res: Response) => {
 
 const updateProfileImage = catchAsync(async (req: Request, res: Response) => {
   const userId = req.params.id;
-  console.log("User ID:", userId); // ডিবাগিংয়ের জন্য ইউজার আইডি কনসোল লগ করা
+  // ডিবাগিংয়ের জন্য ইউজার আইডি কনসোল লগ করা
 // ডিবাগিংয়ের জন্য ইউজার আইডি কনসোল লগ করা
   // ফাইল এক্সট্র্যাক্ট করা
   const file = req.file; // এখানে req.file ব্যবহার করতে হবে, কারণ single image upload
@@ -206,13 +206,75 @@ const updateProfileImage = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+const updateUserDocument = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.params.id;
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+  // যদি কোনো ফাইল না থাকে
+  if (!files?.images || files.images.length === 0) {
+    throw new ApiError(400, "কোনও ছবি পাওয়া যায়নি");
+  }
+
+  // প্রতিটি ছবি Cloudinary-তে আপলোড করা
+  const imageUrls = await Promise.all(
+    files.images.map(async (file) => {
+      const uploaded = await fileUploader.uploadToCloudinary(file);
+      return uploaded.Location;
+    })
+  );
+
+  // সার্ভিসে পাঠানো যাতে user-এর images আপডেট হয়
+  const user = await userService.updateUserDocument(userId, imageUrls);
+
+  res.status(200).json({
+    success: true,
+    message: "ইউজারের ডকুমেন্ট (ছবি) সফলভাবে আপডেট হয়েছে!",
+    data: user,
+  });
+});
+
+
+const getUserProfile = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.params.id;
+  const user = await userService.getUserProfile(userId);
+  res.status(200).json({
+    success: true,
+    message: "User profile retrieved successfully!",
+    data: user,
+  });
+});
+
+
+
+
+const deleteUserDocumentImage = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.params.id;
+  const { imageUrl } = req.body;
+
+  if (!imageUrl) {
+    throw new ApiError(400, "ছবির URL প্রদান করতে হবে");
+  }
+
+  const user = await userService.deleteUserDocumentImage(userId, imageUrl);
+
+  res.status(200).json({
+    success: true,
+    message: "ছবি সফলভাবে ডিলিট হয়েছে!",
+    data: user,
+  });
+});
+
+
 
 
 
 export const userController = {
   createUser,
   updateProfile,
-  updateProfileImage
+  updateProfileImage,
+  updateUserDocument,
+  getUserProfile,
+  deleteUserDocumentImage
   // getUsers,
   // updateProfile,
   // updateUser

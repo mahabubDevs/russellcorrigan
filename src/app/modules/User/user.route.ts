@@ -19,6 +19,11 @@ router.post(
 
 router.put("/update-profile/:id",auth(), userController.updateProfile);
 router.put("/update-profileImage/:id", auth(), fileUploader.uploadSingle, userController.updateProfileImage);
+router.put("/update-document/:id", auth(UserRole.Provider), fileUploader.uploadMultipleImage, userController.updateUserDocument);
+
+router.get("/profile/:id", auth(), userController.getUserProfile);
+
+router.delete('/profile/:id', auth(UserRole.Provider), userController.deleteUserDocumentImage);
 
 
 export const userRoutes = router;

@@ -348,13 +348,96 @@ const updateUserProfileImage = async (userId: string, imageUrl: string) => {
   return updatedUser;
 };
 
+const updateUserDocument = async (userId: string, imageUrls: string[]) => {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+
+  if (!user) {
+    throw new ApiError(404, "ইউজার খুঁজে পাওয়া যায়নি");
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      images: { push: imageUrls }, // নতুন ছবি আগের ছবির সাথে যুক্ত করা
+    },
+    select: {
+      id: true,
+      images: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  return updatedUser;
+};
+
+
+
+const getUserProfile = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      phoneNumber: true,
+      profileImage: true,
+      role: true,
+      images: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  return user;
+};
+
+
+
+
+const deleteFirstMatchFromArray = (arr: string[], valueToRemove: string): string[] => {
+  const index = arr.indexOf(valueToRemove);
+  if (index === -1) return arr;
+  return [...arr.slice(0, index), ...arr.slice(index + 1)];
+};
+
+const deleteUserDocumentImage = async (userId: string, imageUrl: string) => {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    throw new ApiError(404, "ইউজার খুঁজে পাওয়া যায়নি");
+  }
+
+  // কেবলমাত্র প্রথম মিলে যাওয়া ছবি মুছে ফেলা
+  const updatedImages = deleteFirstMatchFromArray(user.images, imageUrl);
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      images: updatedImages,
+    },
+    select: {
+      id: true,
+      images: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  return updatedUser;
+};
 
 
 
 export const userService = {
   createUserIntoDb,
   updateUserProfile,
-  updateUserProfileImage
+  updateUserProfileImage,
+  updateUserDocument,
+  getUserProfile,
+  deleteUserDocumentImage
   // getUsersFromDb,
   // updateProfile,
   // updateUserIntoDb,
