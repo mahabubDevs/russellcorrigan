@@ -96,10 +96,57 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+const updateProfile = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.params.id;
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+  const body = req.body;
+  let imageUrls: string[] = [];
+  if (files?.images && files.images.length > 0) {
+    const uploads = await Promise.all(
+      files.images.map(async (file) => {
+        const uploaded = await fileUploader.uploadToCloudinary(file);
+        return uploaded.Location;
+      })
+    );
+    imageUrls = uploads;
+  }
+  const userPayload = {
+    ...body,
+    images: imageUrls, // Attach uploaded image URLs
+  };
+  const user = await userService.updateUserProfile(userId, userPayload,req);
+  res.status(200).json({
+    success: true,
+    message: "User profile updated successfully!",
+    data: user,
+  });
+});
 
-
-
-
+// const updateProfileImage = catchAsync(async (req: Request, res: Response) => {
+//   const userId = req.params.id;
+//   const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+//   const body = req.body;
+//   let imageUrls: string[] = [];
+//   if (files?.images && files.images.length > 0) {
+//     const uploads = await Promise.all(
+//       files.images.map(async (file) => {
+//         const uploaded = await fileUploader.uploadToCloudinary(file);
+//         return uploaded.Location;
+//       })
+//     );
+//     imageUrls = uploads;
+//   }
+//   const userPayload = {
+//     ...body,
+//     images: imageUrls, // Attach uploaded image URLs
+//   };
+//   const user = await userService.updateProfileImage(userId, userPayload,req);
+//   res.status(200).json({
+//     success: true,
+//     message: "User profile updated successfully!",
+//     data: user,
+//   });
+// });
 
 
 
@@ -114,50 +161,59 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
 
 
 // get all user form db
-const getUsers = catchAsync(async (req: Request, res: Response) => {
+// const getUsers = catchAsync(async (req: Request, res: Response) => {
 
-  const filters = pick(req.query, userFilterableFields);
-  const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder'])
+//   const filters = pick(req.query, userFilterableFields);
+//   const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder'])
 
-  const result = await userService.getUsersFromDb(filters, options);
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
+//   const result = await userService.getUsersFromDb(filters, options);
+//   sendResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: "Users retrieve successfully!",
+//     data: result,
+//   });
+// });
+
+
+const updateProfileImage = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.params.id;
+  console.log("User ID:", userId); // ডিবাগিংয়ের জন্য ইউজার আইডি কনসোল লগ করা
+// ডিবাগিংয়ের জন্য ইউজার আইডি কনসোল লগ করা
+  // ফাইল এক্সট্র্যাক্ট করা
+  const file = req.file; // এখানে req.file ব্যবহার করতে হবে, কারণ single image upload
+
+// ডিবাগিংয়ের জন্য ফাইল কনসোল লগ করা
+  // ফাইল যদি না থাকে, তাহলে ত্রুটি পাঠান
+  // যদি ফাইল না থাকে, তাহলে ত্রুটি পাঠান
+  if (!file) {
+    throw new ApiError(400, "কোনও ছবি পাওয়া যায়নি"); // এখানে 'No image found' ত্রুটি আসবে
+  }
+
+  // Cloudinary তে ছবি আপলোড করা
+  const uploaded = await fileUploader.uploadToCloudinary(file);
+  const imageUrl = uploaded.Location;
+
+  // সার্ভিসে ব্যবহারকারীর ছবি আপডেট করা
+  const user = await userService.updateUserProfileImage(userId, imageUrl);
+
+  // সফলভাবে আপডেট হলে রেসপন্স পাঠানো
+  res.status(200).json({
     success: true,
-    message: "Users retrieve successfully!",
-    data: result,
+    message: "User profile image updated successfully!",
+    data: user,
   });
 });
 
 
-// get all user form db
-const updateProfile = catchAsync(async (req: Request & {user?:any}, res: Response) => {
-  const user = req?.user;
-
-  const result = await userService.updateProfile(req);
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "Profile updated successfully!",
-    data: result,
-  });
-});
 
 
-// *! update user role and account status
-const updateUser = catchAsync(async (req: Request, res: Response) => {
-const id = req.params.id;
-  const result = await userService.updateUserIntoDb( req.body,id);
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "User updated successfully!",
-    data: result,
-  });
-});
 
 export const userController = {
   createUser,
-  getUsers,
   updateProfile,
-  updateUser
+  updateProfileImage
+  // getUsers,
+  // updateProfile,
+  // updateUser
 };

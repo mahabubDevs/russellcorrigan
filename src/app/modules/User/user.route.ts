@@ -8,13 +8,6 @@ import { fileUploader } from "../../../helpars/fileUploader";
 
 const router = express.Router();
 
-// *!register user
-// router.post(
-//   "/register",
-//   fileUploader.uploadMultipleImage,
-//   validateRequest(UserValidation.CreateUserValidationSchema),
-//   userController.createUser
-// );
 
 
 
@@ -24,23 +17,8 @@ router.post(
   userController.createUser
 );
 
+router.put("/update-profile/:id",auth(), userController.updateProfile);
+router.put("/update-profileImage/:id", auth(), fileUploader.uploadSingle, userController.updateProfileImage);
 
-
-
-// *!get all  user
-router.get("/", userController.getUsers);
-
-// *!profile user
-router.put(
-  "/profile",
-  // validateRequest(UserValidation.userUpdateSchema),
-
-  auth(UserRole.Provider, UserRole.Customer),
-  fileUploader.uploadSingle,
-  userController.updateProfile
-);
-
-// *!update  user
-router.put("/:id", userController.updateUser);
 
 export const userRoutes = router;

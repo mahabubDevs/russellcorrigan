@@ -45,7 +45,7 @@ const cloudinaryStorage = new CloudinaryStorage({
 const cloudinaryUpload = multer({ storage: cloudinaryStorage });
 
 // Upload single image
-const uploadSingle = upload.single("image");
+const uploadSingle = upload.single("profileImage");
 const uploadFile = upload.single("file");
 
 // Upload multiple images
