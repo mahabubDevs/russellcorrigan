@@ -23,18 +23,26 @@ model User {
   otp           Int?
   password      String
   role          UserRole   @default(Customer)
+  notification    Notification[]
+  isNotification  Boolean        @default(true)
+  accountLink     String?
+  stripeAccountID String?
+  customerId      String?        @default("")
   status        UserStatus @default(ACTIVE)
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
+  offersSent      OfferDetails[] @relation("SenderRelation")
+  offersReceived  OfferDetails[] @relation("ReceiverRelation")
+  isOnboarding    Boolean        @default(false)
 
   @@map("Users")
 }
 
 
-
 enum UserRole {
   Customer
   Provider
+  Admin
 }
 
 enum UserStatus {
@@ -42,3 +50,67 @@ enum UserStatus {
   INACTIVE
   BLOCKED
 }
+
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  title     String
+  body      String
+  data      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+
+model Payment {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  paymentId     String
+  offerId       String
+  senderId      String
+  receiverId    String
+  paymentAmount Float
+  platformFee   Float
+  paymentDate   DateTime      @default(now())
+  status        PaymentStatus @default(PENDING)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@map("payments")
+}
+
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COMPLETED
+}
+
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  REFUNDED
+  REQUIRES_CAPTURE
+}
+
+
+model OfferDetails {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  amount      Float
+  status      OfferStatus
+  description String?      @default("")
+  senderId    String       @db.ObjectId
+  receiverId  String       @db.ObjectId
+  sender      User         @relation("SenderRelation", fields: [senderId], references: [id])
+  receiver    User         @relation("ReceiverRelation", fields: [receiverId], references: [id])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("offerDetails")
+}
+

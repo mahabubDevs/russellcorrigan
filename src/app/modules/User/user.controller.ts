@@ -178,26 +178,23 @@ const updateProfile = catchAsync(async (req: Request, res: Response) => {
 
 const updateProfileImage = catchAsync(async (req: Request, res: Response) => {
   const userId = req.params.id;
-  // ডিবাগিংয়ের জন্য ইউজার আইডি কনসোল লগ করা
-// ডিবাগিংয়ের জন্য ইউজার আইডি কনসোল লগ করা
-  // ফাইল এক্সট্র্যাক্ট করা
-  const file = req.file; // এখানে req.file ব্যবহার করতে হবে, কারণ single image upload
 
-// ডিবাগিংয়ের জন্য ফাইল কনসোল লগ করা
-  // ফাইল যদি না থাকে, তাহলে ত্রুটি পাঠান
-  // যদি ফাইল না থাকে, তাহলে ত্রুটি পাঠান
+  const file = req.file; //
+
+
+
   if (!file) {
-    throw new ApiError(400, "কোনও ছবি পাওয়া যায়নি"); // এখানে 'No image found' ত্রুটি আসবে
+    throw new ApiError(400, "No image found"); 
   }
 
-  // Cloudinary তে ছবি আপলোড করা
+  // Cloudinary image upload
   const uploaded = await fileUploader.uploadToCloudinary(file);
   const imageUrl = uploaded.Location;
 
-  // সার্ভিসে ব্যবহারকারীর ছবি আপডেট করা
+  // service call to update user profile image
   const user = await userService.updateUserProfileImage(userId, imageUrl);
 
-  // সফলভাবে আপডেট হলে রেসপন্স পাঠানো
+  // service call to update user profile image
   res.status(200).json({
     success: true,
     message: "User profile image updated successfully!",
@@ -210,12 +207,12 @@ const updateUserDocument = catchAsync(async (req: Request, res: Response) => {
   const userId = req.params.id;
   const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
-  // যদি কোনো ফাইল না থাকে
+  // if not found any image
   if (!files?.images || files.images.length === 0) {
-    throw new ApiError(400, "কোনও ছবি পাওয়া যায়নি");
+    throw new ApiError(400, "No images found"); 
   }
 
-  // প্রতিটি ছবি Cloudinary-তে আপলোড করা
+  // Every image upload to cloudinary
   const imageUrls = await Promise.all(
     files.images.map(async (file) => {
       const uploaded = await fileUploader.uploadToCloudinary(file);
@@ -223,12 +220,12 @@ const updateUserDocument = catchAsync(async (req: Request, res: Response) => {
     })
   );
 
-  // সার্ভিসে পাঠানো যাতে user-এর images আপডেট হয়
+  // service call to update user document
   const user = await userService.updateUserDocument(userId, imageUrls);
 
   res.status(200).json({
     success: true,
-    message: "ইউজারের ডকুমেন্ট (ছবি) সফলভাবে আপডেট হয়েছে!",
+    message: "successfully updated user document!",
     data: user,
   });
 });
@@ -252,14 +249,14 @@ const deleteUserDocumentImage = catchAsync(async (req: Request, res: Response) =
   const { imageUrl } = req.body;
 
   if (!imageUrl) {
-    throw new ApiError(400, "ছবির URL প্রদান করতে হবে");
+    throw new ApiError(400, "Image URL is required");
   }
 
   const user = await userService.deleteUserDocumentImage(userId, imageUrl);
 
   res.status(200).json({
     success: true,
-    message: "ছবি সফলভাবে ডিলিট হয়েছে!",
+    message: "Image deleted successfully!",
     data: user,
   });
 });
@@ -275,7 +272,5 @@ export const userController = {
   updateUserDocument,
   getUserProfile,
   deleteUserDocumentImage
-  // getUsers,
-  // updateProfile,
-  // updateUser
+ 
 };
