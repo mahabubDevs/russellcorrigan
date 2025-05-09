@@ -39,6 +39,36 @@ model User {
 }
 
 
+
+
+
+model PriceCalculation {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  serviceType   String
+  area          Int
+  driveways     String[]
+  isCornerLot   Boolean?
+  extraFeet     Int?
+  isSteep       Boolean?
+  isPriority    Boolean?
+
+  basePrice     Int
+  additionsPrice Int
+  totalPrice    Int
+
+  createdAt     DateTime @default(now())
+
+  @@map("priceCalculations")
+}
+
+
+
+
+
+
+
+
+
 enum UserRole {
   Customer
   Provider
