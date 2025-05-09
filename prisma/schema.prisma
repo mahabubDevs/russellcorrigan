@@ -9,31 +9,32 @@ datasource db {
 
 model User {
   id            String     @id @default(auto()) @map("_id") @db.ObjectId
-
-  // username      String? @unique
-  firstName String?
-  lastName String?
-  fullName String?
-  dob DateTime?
+  firstName     String?
+  lastName      String?
+  fullName      String?
+  dob           DateTime?
   email         String     @unique
-  phoneNumber         String?    
-  images         String[]
+  phoneNumber   String?    
+  images        String[]
   profileImage  String?
   expirationOtp DateTime?
   otp           Int?
   password      String
   role          UserRole   @default(Customer)
-  notification    Notification[]
-  isNotification  Boolean        @default(true)
-  accountLink     String?
+  notification  Notification[]
+  isNotification Boolean   @default(true)
+  accountLink   String?
   stripeAccountID String?
-  customerId      String?        @default("")
+  customerId    String?    @default("")
   status        UserStatus @default(ACTIVE)
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
-  offersSent      OfferDetails[] @relation("SenderRelation")
-  offersReceived  OfferDetails[] @relation("ReceiverRelation")
-  isOnboarding    Boolean        @default(false)
+  offersSent    OfferDetails[] @relation("SenderRelation")
+  offersReceived OfferDetails[] @relation("ReceiverRelation")
+  isOnboarding  Boolean    @default(false)
+
+  // Reverse relation field
+  priceCalculations PriceCalculation[]  // Adding reverse relation
 
   @@map("Users")
 }
@@ -42,24 +43,30 @@ model User {
 
 
 
+
 model PriceCalculation {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  serviceType   String
-  area          Int
-  driveways     String[]
-  isCornerLot   Boolean?
-  extraFeet     Int?
-  isSteep       Boolean?
-  isPriority    Boolean?
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  serviceType     String
+  area            Int
+  driveways       String[]
+  isCornerLot     Boolean?
+  extraFeet       Int?
+  isSteep         Boolean?
+  isPriority      Boolean?
 
-  basePrice     Int
-  additionsPrice Int
-  totalPrice    Int
+  basePrice       Int
+  additionsPrice  Int
+  totalPrice      Int
 
-  createdAt     DateTime @default(now())
+  createdAt       DateTime @default(now())
+
+  userId          String   @db.ObjectId
+  user            User     @relation(fields: [userId], references: [id])
 
   @@map("priceCalculations")
 }
+
+
 
 
 

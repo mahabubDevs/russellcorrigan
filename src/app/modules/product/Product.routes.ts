@@ -15,5 +15,5 @@ router.post(
   ProductvalidateRequest(ProductValidation.priceValidationSchema),
   ProductController.calculatePrice
 );
-
+router.get("/get-product/:id", auth(UserRole.Customer), ProductController.getAllPrices);
 export const ProductRoutes = router;

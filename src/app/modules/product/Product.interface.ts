@@ -6,7 +6,9 @@ export interface PriceRequest {
   extraFeet?: number;
   isSteep?: boolean;
   isPriority?: boolean;
+  userId: string; // Add userId here
 }
+
 
 export interface PriceResponse {
   basePrice: number;
