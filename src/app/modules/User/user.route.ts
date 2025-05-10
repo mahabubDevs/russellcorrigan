@@ -16,7 +16,7 @@ router.post(
   fileUploader.uploadMultipleImage, // Multer middleware for handling multiple files
   userController.createUser
 );
-
+// router.post("/verify-email", verifyEmail);
 router.put("/update-profile/:id",auth(), userController.updateProfile);
 router.put("/update-profileImage/:id", auth(), fileUploader.uploadSingle, userController.updateProfileImage);
 router.put("/update-document/:id", auth(UserRole.Provider), fileUploader.uploadMultipleImage, userController.updateUserDocument);

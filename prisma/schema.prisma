@@ -32,6 +32,9 @@ model User {
   offersSent    OfferDetails[] @relation("SenderRelation")
   offersReceived OfferDetails[] @relation("ReceiverRelation")
   isOnboarding  Boolean    @default(false)
+  emailVerified                 Boolean  @default(false)
+  emailVerificationToken        String?
+  otpExpiresAt  DateTime?
 
   // Reverse relation field
   priceCalculations PriceCalculation[]  // Adding reverse relation
@@ -60,6 +63,7 @@ model PriceCalculation {
   extraFeet       Int?
   isSteep         Boolean?
   isPriority      Boolean?
+  images        String[]
 
   basePrice       Int
   additionsPrice  Int

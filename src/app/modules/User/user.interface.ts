@@ -15,6 +15,8 @@ export interface IUser {
   isDeleted:boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  otp: number;
+  otpExpires: Date;
 }
 
 export type IUserFilterRequest = {

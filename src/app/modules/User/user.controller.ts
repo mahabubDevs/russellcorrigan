@@ -7,6 +7,11 @@ import pick from "../../../shared/pick";
 import { userFilterableFields } from "./user.costant";
 import { fileUploader } from "../../../helpars/fileUploader";
 import ApiError from "../../../errors/ApiErrors";
+import emailSender from "../../../shared/emailSender";
+import prisma from "../../../shared/prisma";
+import bcrypt from "bcrypt";
+import dayjs from "dayjs";
+import { IUser } from "./user.interface";
 
 // const createUser = catchAsync(async (req: Request, res: Response) => {
 //   const result = await userService.createUserIntoDb(req.body,req);
@@ -25,16 +30,63 @@ import ApiError from "../../../errors/ApiErrors";
 
 
 
-// const createUser = catchAsync(async (req: Request, res: Response) => {
-//   const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-//   const body = req.body;
+const createUser = catchAsync(async (req: Request, res: Response) => {
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+  const body = req.body;
 
+  let imageUrls: string[] = [];
+
+  if (files?.images && files.images.length > 0) {
+    const uploads = await Promise.all(
+      files.images.map(async (file) => {
+        // Upload to Cloudinary (or switch to uploadToDigitalOcean if needed)
+        const uploaded = await fileUploader.uploadToCloudinary(file);
+        return uploaded.Location;
+      })
+    );
+    imageUrls = uploads;
+  }
+
+  // Combine user data with image URLs
+  const userPayload = {
+    ...body,
+    images: imageUrls,
+  };
+
+  const user = await userService.createUserIntoDb(userPayload);
+
+  console.log("user", user);
+  
+   res.status(200).json({
+    success: true,
+    message: "Otp send successfully!",
+  
+  });
+
+  // res.status(201).json({
+  //   success: true,
+  //   message: "User registered successfully!",
+  //   data: user,
+  // });
+});
+
+
+
+
+
+
+// const createUser = catchAsync(async (req: Request, res: Response) => {
+//   const stringData = req.body.data;
+//   const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+//   if (!stringData) throw new ApiError(400, "Missing user data in 'data' field");
+
+//   const body = JSON.parse(stringData); // Parse the JSON string from "data"
 //   let imageUrls: string[] = [];
 
 //   if (files?.images && files.images.length > 0) {
 //     const uploads = await Promise.all(
 //       files.images.map(async (file) => {
-//         // Upload to Cloudinary (or switch to uploadToDigitalOcean if needed)
 //         const uploaded = await fileUploader.uploadToCloudinary(file);
 //         return uploaded.Location;
 //       })
@@ -42,10 +94,9 @@ import ApiError from "../../../errors/ApiErrors";
 //     imageUrls = uploads;
 //   }
 
-//   // Combine user data with image URLs
 //   const userPayload = {
 //     ...body,
-//     images: imageUrls,
+//     images: imageUrls, // Attach uploaded image URLs
 //   };
 
 //   const user = await userService.createUserIntoDb(userPayload);
@@ -61,66 +112,62 @@ import ApiError from "../../../errors/ApiErrors";
 
 
 
-
-const createUser = catchAsync(async (req: Request, res: Response) => {
-  const stringData = req.body.data;
-  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-
-  if (!stringData) throw new ApiError(400, "Missing user data in 'data' field");
-
-  const body = JSON.parse(stringData); // Parse the JSON string from "data"
-  let imageUrls: string[] = [];
-
-  if (files?.images && files.images.length > 0) {
-    const uploads = await Promise.all(
-      files.images.map(async (file) => {
-        const uploaded = await fileUploader.uploadToCloudinary(file);
-        return uploaded.Location;
-      })
-    );
-    imageUrls = uploads;
-  }
-
-  const userPayload = {
-    ...body,
-    images: imageUrls, // Attach uploaded image URLs
-  };
-
-  const user = await userService.createUserIntoDb(userPayload);
-
-  res.status(201).json({
-    success: true,
-    message: "User registered successfully!",
-    data: user,
-  });
-});
+// const updateProfile = catchAsync(async (req: Request, res: Response) => {
+//   console.log("updateProfile", req.body);
+//   const userId = req.params.id;
+//   const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+//   const body = req.body;
+//   console.log("updateProfile body", body);
+//   let imageUrls: string[] = [];
+//   if (files?.images && files.images.length > 0) {
+//     const uploads = await Promise.all(
+//       files.images.map(async (file) => {
+//         const uploaded = await fileUploader.uploadToCloudinary(file);
+//         return uploaded.Location;
+//       })
+//     );
+//     imageUrls = uploads;
+//   }
+//   const userPayload = {
+//     ...body,
+//     images: imageUrls, // Attach uploaded image URLs
+//   };
+//   const user = await userService.updateUserProfile(userId, userPayload,req);
+//   res.status(200).json({
+//     success: true,
+//     message: "User profile updated successfully!",
+//     data: user,
+//   });
+// });
 
 
-const updateProfile = catchAsync(async (req: Request, res: Response) => {
+
+ const updateProfile = catchAsync(async (req: Request, res: Response) => {
+  console.log("updateProfile", req.body);  // For debugging incoming request data
+
+  // Get the userId from the request parameters (from the URL)
   const userId = req.params.id;
-  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+  
+  // Get the updated user data from the request body
   const body = req.body;
-  let imageUrls: string[] = [];
-  if (files?.images && files.images.length > 0) {
-    const uploads = await Promise.all(
-      files.images.map(async (file) => {
-        const uploaded = await fileUploader.uploadToCloudinary(file);
-        return uploaded.Location;
-      })
-    );
-    imageUrls = uploads;
-  }
+
+  // Construct the user payload (without images) for the update
   const userPayload = {
-    ...body,
-    images: imageUrls, // Attach uploaded image URLs
+    ...body,  // Use all the fields from the body data (firstName, lastName, etc.)
   };
-  const user = await userService.updateUserProfile(userId, userPayload,req);
+
+  // Call the service to update the user profile in the database
+  const user = await userService.updateUserProfile(userId, userPayload);
+
+  // Send the response to indicate that the profile has been updated
   res.status(200).json({
     success: true,
     message: "User profile updated successfully!",
     data: user,
   });
 });
+
+
 
 // const updateProfileImage = catchAsync(async (req: Request, res: Response) => {
 //   const userId = req.params.id;

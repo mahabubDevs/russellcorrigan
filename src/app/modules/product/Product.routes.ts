@@ -5,6 +5,7 @@ import { UserRole } from "@prisma/client";
 
 import { ProductValidation } from "./Product.validation";
 import ProductvalidateRequest from "../../middlewares/productValidation";
+import { fileUploader } from "../../../helpars/fileUploader";
 
 const router = express.Router();
 
@@ -13,7 +14,9 @@ router.post(
   "/calculate",
   auth(UserRole.Customer),
   ProductvalidateRequest(ProductValidation.priceValidationSchema),
+  
   ProductController.calculatePrice
 );
-router.get("/get-product/:id", auth(UserRole.Customer), ProductController.getAllPrices);
+// router.get("/get-product/:id", auth(UserRole.Customer), ProductController.getAllPrices);
+
 export const ProductRoutes = router;
