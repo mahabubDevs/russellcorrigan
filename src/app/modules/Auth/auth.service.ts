@@ -5,14 +5,15 @@ import prisma from "../../../shared/prisma";
 import * as bcrypt from "bcrypt";
 import ApiError from "../../../errors/ApiErrors";
 import emailSender from "../../../shared/emailSender";
-import { UserStatus } from "@prisma/client";
+import { UserRole, UserStatus } from "@prisma/client";
 import httpStatus from "http-status";
 import crypto from 'crypto';
 // user login
-const loginUser = async (payload: { email: string; password: string }) => {
+const loginUser = async (payload: { email: string; password: string ; role: string  }) => {
   const userData = await prisma.user.findUnique({
     where: {
       email: payload.email,
+      role: payload.role as UserRole,
     },
   });
 
@@ -40,7 +41,7 @@ const loginUser = async (payload: { email: string; password: string }) => {
     config.jwt.expires_in as string
   );
 
-  return { token: accessToken };
+  return { token: accessToken , role: userData.role };
 };
 
 // get user profile
