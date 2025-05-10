@@ -46,8 +46,15 @@ model User {
 
 model PriceCalculation {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  address         String?
+  location       String?
+
   serviceType     String
+  perimeter       Int
   area            Int
+  lat            Float
+  lng            Float
   driveways       String[]
   isCornerLot     Boolean?
   extraFeet       Int?
@@ -57,6 +64,8 @@ model PriceCalculation {
   basePrice       Int
   additionsPrice  Int
   totalPrice      Int
+
+
 
   createdAt       DateTime @default(now())
 

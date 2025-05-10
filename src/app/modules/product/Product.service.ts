@@ -69,23 +69,31 @@ const calculatePrice = async (data: PriceRequest): Promise<PriceResponse> => {
   const totalPrice = basePrice + additionsPrice;
 
   // Save to database and associate with the user
-  await prisma.priceCalculation.create({
-    data: {
-      serviceType: data.serviceType,
-      area: data.area,
-      driveways: data.driveways || [],
-      isCornerLot: data.isCornerLot || false,
-      extraFeet: data.extraFeet || 0,
-      isSteep: data.isSteep || false,
-      isPriority: data.isPriority || false,
-      basePrice,
-      additionsPrice,
-      totalPrice,
-      userId: data.userId,  // Store the userId here
-    },
-  });
+ await prisma.priceCalculation.create({
+  data: {
+    serviceType: data.serviceType || "snow",
+    address: data.address || "Unknown Address", 
+    location: data.location || "Unknown",        
+    perimeter: data.perimeter || 0,              
+    area: data.area,
+    lat: isNaN(Number(data.lat)) ? 0 : Number(data.lat),  
+    lng: isNaN(Number(data.lng)) ? 0 : Number(data.lng),  
+    driveways: data.driveways || [],
+    isCornerLot: data.isCornerLot || false,
+    extraFeet: data.extraFeet || 0,
+    isSteep: data.isSteep || false,
+    isPriority: data.isPriority || false,
+    basePrice,
+    additionsPrice,
+    totalPrice,
+    userId: data.userId,
+  },
+});
+
 
   return {
+    address: data.address,
+    location: data.location,
     basePrice,
     additionsPrice,
     totalPrice,
@@ -98,7 +106,10 @@ const getAll = async (userId: string) => {
   });
   return prices.map((price) => ({
     id: price.id,
+    address: price.address,
+    location: price.location,
     serviceType: price.serviceType,
+    perimeter: price.perimeter,
     area: price.area,
     driveways: price.driveways,
     isCornerLot: price.isCornerLot,
