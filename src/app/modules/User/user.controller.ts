@@ -32,7 +32,7 @@ import { IUser } from "./user.interface";
 
 const createUser = catchAsync(async (req: Request, res: Response) => {
   const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-  const body = req.body;
+  const body = JSON.parse(req.body.data); // Parse the JSON string from "data"
 
   let imageUrls: string[] = [];
 
@@ -52,7 +52,7 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
     ...body,
     images: imageUrls,
   };
-
+  
   const user = await userService.createUserIntoDb(userPayload);
 
   console.log("user", user);
@@ -68,6 +68,19 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
   //   message: "User registered successfully!",
   //   data: user,
   // });
+});
+
+const verifyEmail = catchAsync(async (req: Request, res: Response) => {
+  const { email, otp } = req.body;
+  const user = await userService.verifyEmail(email, otp);
+  if (!user) {
+    throw new ApiError(400, "Invalid OTP");
+  }
+  res.status(200).json({
+    success: true,
+    message: "Email verified successfully!",
+    data: user,
+  });
 });
 
 
@@ -318,6 +331,7 @@ export const userController = {
   updateProfileImage,
   updateUserDocument,
   getUserProfile,
-  deleteUserDocumentImage
+  deleteUserDocumentImage,
+  verifyEmail,
  
 };

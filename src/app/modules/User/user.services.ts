@@ -14,6 +14,7 @@ import { string } from "zod";
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import emailSender from "../../../shared/emailSender";
+import { json } from "stream/consumers";
 // Create a new user in the database.
 
 
@@ -23,13 +24,16 @@ import emailSender from "../../../shared/emailSender";
 
 
 const createUserIntoDb = async (payload: IUser) => {
-  const hashedPassword = await bcrypt.hash(payload.password, 10);
+  // const hashedPassword = await bcrypt.hash(payload.password, 10);
 
- 
+ console.log("payload", payload);
+  
+
   const result = await prisma.user.create({
     data: {
       ...payload,
-      password: hashedPassword,
+      // password: hashedPassword,
+      email: payload.email,
      
     },
     select: {
@@ -45,13 +49,13 @@ const createUserIntoDb = async (payload: IUser) => {
     },
   });
 
-
+console.log("result", result);
 
   // Generate a new OTP
   const otp = Number(crypto.randomInt(1000, 9999));
 
   // Set OTP expiration time to 10 minutes from now
-  const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+  const otpExpires = new Date(Date.now() + 30 * 60 * 1000);
 
   // Create the email content
   const html = `
@@ -101,6 +105,48 @@ const createUserIntoDb = async (payload: IUser) => {
 
 };
 
+
+const verifyEmail = async (email: string, otp: number) => {
+  // Find the user by email
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  // Check if the OTP matches and is not expired
+  if (user.otp !== otp) {
+    throw new ApiError(400, "Invalid OTP");
+  }
+  const currentTime = new Date();
+
+  if (!user.expirationOtp && user.expirationOtp! < currentTime) {
+    throw new ApiError(400, "OTP has expired");
+  }
+  // Update the user's email verification status
+  const updatedUser = await prisma.user.update({
+    where: { email },
+    data: {
+      emailVerified: true,
+      otp: null, // Clear the OTP after verification
+      expirationOtp: null, // Clear the expiration time
+    },
+    select: {
+      id: true,
+      firstName: true,      
+      lastName: true,
+      email: true,
+      phoneNumber: true,
+      role: true,
+      images: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+  return updatedUser;
+
+  // Generate a JWT token
+}
 
 
 const updateUserProfile = async (
@@ -423,7 +469,7 @@ export const userService = {
   updateUserDocument,
   getUserProfile,
   deleteUserDocumentImage,
-
+  verifyEmail
   // getUsersFromDb,
   // updateProfile,
   // updateUserIntoDb,
