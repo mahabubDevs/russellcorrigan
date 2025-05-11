@@ -55,7 +55,7 @@ console.log("result", result);
   const otp = Number(crypto.randomInt(1000, 9999));
 
   // Set OTP expiration time to 10 minutes from now
-  const otpExpires = new Date(Date.now() + 30 * 60 * 1000);
+  const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
   // Create the email content
   const html = `
@@ -65,7 +65,7 @@ console.log("result", result);
             <span style="color: #ffeb3b;">Forgot Password OTP</span>
         </h2>
         <p style="font-size: 16px; color: #333; line-height: 1.5; text-align: center;">
-            Your forgot password OTP code is below.
+            Your Register Verification OTP code is below.
         </p>
         <p style="font-size: 32px; font-weight: bold; color: #ff4081; text-align: center; margin: 20px 0;">
             ${otp}
