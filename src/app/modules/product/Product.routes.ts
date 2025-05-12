@@ -1,11 +1,13 @@
 import express from "express";
-import { ProductController } from "./Product.controller";
+
 import auth from "../../middlewares/auth";
 import { UserRole } from "@prisma/client";
 
-import { ProductValidation } from "./Product.validation";
+// import { ProductValidation } from "./Product.validation";
 import ProductvalidateRequest from "../../middlewares/productValidation";
 import { fileUploader } from "../../../helpars/fileUploader";
+import { ProductValidation } from "./Product.validation";
+import { ProductController } from "./Product.controller";
 
 const router = express.Router();
 
@@ -14,10 +16,20 @@ router.post(
   "/",
   auth(UserRole.Customer),
   fileUploader.uploadMultipleImage,
-  ProductvalidateRequest(ProductValidation.priceValidationSchema),
-  
+  ProductvalidateRequest(ProductValidation.productValidationSchema),
   ProductController.createProduct
 );
+
+
+router.get("/:id", auth(UserRole.Customer), ProductController.getAllPrices);
+// router.post("/", fileUploader.uploadSingle, handleCreateProduct);
 // router.get("/get-product/:id", auth(UserRole.Customer), ProductController.getAllPrices);
 
 export const ProductRoutes = router;
+
+
+
+
+
+
+

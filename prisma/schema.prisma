@@ -37,7 +37,7 @@ model User {
   otpExpiresAt  DateTime?
 
   // Reverse relation field
-  priceCalculations PriceCalculation[]  // Adding reverse relation
+  Product CreateProduct[]  // Adding reverse relation
 
   @@map("Users")
 }
@@ -47,7 +47,7 @@ model User {
 
 
 
-model PriceCalculation {
+model CreateProduct {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
 
   address         String?
@@ -76,8 +76,11 @@ model PriceCalculation {
   userId          String   @db.ObjectId
   user            User     @relation(fields: [userId], references: [id])
 
-  @@map("priceCalculations")
+  @@map("CreateProduct")
 }
+
+
+
 
 
 

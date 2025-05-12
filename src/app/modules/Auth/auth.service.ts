@@ -288,6 +288,7 @@ const resetPassword = async (payload: { password: string; email: string }) => {
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, 'This user is not found!');
   }
+  
 
   // Hash the new password
   const hashedPassword = await bcrypt.hash(payload.password, 10);

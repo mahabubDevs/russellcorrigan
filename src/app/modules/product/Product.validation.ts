@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const priceValidationSchema = z.object({
+const productValidationSchema = z.object({
   serviceType: z.enum(["snow", "lawn"], {
     required_error: "Service type is required",
   }),
@@ -16,5 +16,21 @@ const priceValidationSchema = z.object({
 });
 
 export const ProductValidation = {
-  priceValidationSchema,
+  productValidationSchema
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

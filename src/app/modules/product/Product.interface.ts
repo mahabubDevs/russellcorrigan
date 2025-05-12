@@ -1,4 +1,4 @@
-export interface PriceRequest {
+export interface CreateProductRequest {
   serviceType: "snow" | "lawn";
   address: string;
   location: string;
@@ -12,13 +12,34 @@ export interface PriceRequest {
   isSteep?: boolean;
   isPriority?: boolean;
   userId: string; // Add userId here
+  images?: string[]; // Add images here
+
+  basePrice: number;
+  additionsPrice: number;
+  totalPrice: number;
 }
 
 
-export interface PriceResponse {
+export interface ProductResponse {
   address: string;
   location: string;
   basePrice: number;
   additionsPrice: number;
   totalPrice: number;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
