@@ -11,11 +11,12 @@ const router = express.Router();
 
 // Price Calculation Route
 router.post(
-  "/calculate",
+  "/",
   auth(UserRole.Customer),
+  fileUploader.uploadMultipleImage,
   ProductvalidateRequest(ProductValidation.priceValidationSchema),
   
-  ProductController.calculatePrice
+  ProductController.createProduct
 );
 // router.get("/get-product/:id", auth(UserRole.Customer), ProductController.getAllPrices);
 

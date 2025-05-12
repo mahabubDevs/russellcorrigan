@@ -24,15 +24,15 @@ import { json } from "stream/consumers";
 
 
 const createUserIntoDb = async (payload: IUser) => {
-  // const hashedPassword = await bcrypt.hash(payload.password, 10);
+  const hashedPassword = await bcrypt.hash(payload.password, 10);
 
- console.log("payload", payload);
+
   
 
   const result = await prisma.user.create({
     data: {
       ...payload,
-      // password: hashedPassword,
+      password: hashedPassword,
       email: payload.email,
      
     },
@@ -62,7 +62,7 @@ console.log("result", result);
 <div style="font-family: Arial, sans-serif; color: #333; padding: 30px; background: linear-gradient(135deg, #6c63ff, #3f51b5); border-radius: 8px;">
     <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 8px;">
         <h2 style="color: #ffffff; font-size: 28px; text-align: center; margin-bottom: 20px;">
-            <span style="color: #ffeb3b;">Forgot Password OTP</span>
+            <span style="color: #ffeb3b;">Verify Account OTP</span>
         </h2>
         <p style="font-size: 16px; color: #333; line-height: 1.5; text-align: center;">
             Your Register Verification OTP code is below.

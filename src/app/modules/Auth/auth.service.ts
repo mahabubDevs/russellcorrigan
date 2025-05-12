@@ -10,12 +10,20 @@ import httpStatus from "http-status";
 import crypto from 'crypto';
 // user login
 const loginUser = async (payload: { email: string; password: string ; role: string  }) => {
-  const userData = await prisma.user.findUnique({
+  const userData = await prisma.user.findFirst({
     where: {
       email: payload.email,
       role: payload.role as UserRole,
     },
   });
+  
+  if (!userData) {
+  throw new ApiError(
+    httpStatus.NOT_FOUND,
+    `User not found with email ${payload.email} and role ${payload.role}`
+  );
+}
+
 
   if (!userData?.email) {
     throw new ApiError(
