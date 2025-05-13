@@ -94,12 +94,12 @@ const createProduct = async (data: CreateProductRequest, imageUrls: string[] ) =
 
 
   return {
-    product
-    // address: data.address,
-    // location: data.location,
-    // basePrice,
-    // additionsPrice,
-    // totalPrice,
+    product,
+    address: data.address,
+    location: data.location,
+    basePrice,
+    additionsPrice,
+    totalPrice,
   };
 };
 
@@ -138,10 +138,47 @@ const getPriceById = async (id: string) => {
 };
 
 
-export const PriceService = {
+
+const deleteProduct = async (id: string) => {
+  const product = await prisma.createProduct.findUnique({
+    where: { id },
+  });
+    if (!product) {
+        throw new ApiError(httpStatus.NOT_FOUND, "Product not found.");
+    }
+    await prisma.createProduct.delete({
+        where: { id },
+    });
+    return { message: "Product deleted successfully." };
+}
+
+
+const updateProduct = async ( data: CreateProductRequest, id: string,) => {
+  const product = await prisma.createProduct.findUnique({
+    where: { id },
+  });
+    if (!product) {
+        throw new ApiError(httpStatus.NOT_FOUND, "Product not found.");
+    }
+    const updatedProduct = await prisma.createProduct.update({
+        where: { id },
+        data: {
+            ...data,
+            images: data.images || product.images, // Keep existing images if not provided
+        },
+    });
+    return updatedProduct;
+}
+
+
+
+
+export const ProductService = {
   createProduct,
   getPriceById,
-  getAll
+  getAll,
+  deleteProduct,
+  updateProduct
 };
 
 

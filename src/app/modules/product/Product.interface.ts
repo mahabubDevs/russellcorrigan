@@ -1,4 +1,5 @@
 export interface CreateProductRequest {
+    id: string;
   serviceType: "snow" | "lawn";
   address: string;
   location: string;

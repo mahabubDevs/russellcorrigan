@@ -22,6 +22,8 @@ router.post(
 
 
 router.get("/:id", auth(UserRole.Customer), ProductController.getAllPrices);
+router.delete("/:id", auth(UserRole.Customer), ProductController.deleteProduct);
+router.put("/:id", auth(UserRole.Customer), ProductController.updateProduct);
 // router.post("/", fileUploader.uploadSingle, handleCreateProduct);
 // router.get("/get-product/:id", auth(UserRole.Customer), ProductController.getAllPrices);
 

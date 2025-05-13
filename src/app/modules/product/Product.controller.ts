@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { PriceService} from "./Product.service";
+import { ProductService} from "./Product.service";
 import { fileUploader } from "../../../helpars/fileUploader";
 
 
@@ -33,7 +33,7 @@ const createProduct = async (req: Request, res: Response) => {
     console.log("calculatePrice try", req.body);
 
     // PriceCalculation করার সময় req.body তে userId থাকতে হবে
-    const result = await PriceService.createProduct(req.body,imageUrls);
+    const result = await ProductService.createProduct(req.body,imageUrls);
     console.log("calculatePrice result", result);
     res.status(200).json(result);
   } catch (error: any) {
@@ -46,7 +46,55 @@ const createProduct = async (req: Request, res: Response) => {
 
 const getAllPrices = async (req: Request, res: Response) => {
   try {
-    const result = await PriceService.getAll(req.params.id);
+    const result = await ProductService.getAll(req.params.id);
+    res.status(200).json(result);
+  } catch (error: any) {
+    res.status(error.statusCode || 500).json({
+      message: error.message || "Something went wrong",
+    });
+  }
+}
+
+const deleteProduct = async (req: Request, res: Response) => {
+  try {
+    const result = await ProductService.deleteProduct(req.params.id);
+    res.status(200).json(result);
+  } catch (error: any) {
+    res.status(error.statusCode || 500).json({
+      message: error.message || "Something went wrong",
+    });
+  } 
+}
+
+const updateProduct = async (req: Request, res: Response) => {
+  try {
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    console.log("updateProduct", req.body);
+    const body = JSON.parse(req.body.data); // Parse the JSON string from "data"
+    // const body = req.body; // Assuming the data is already in JSON format
+    console.log("updateProduct body", body);
+  
+    let imageUrls: string[] = [];
+  
+    if (files?.images && files.images.length > 0) {
+      const uploads = await Promise.all(
+        files.images.map(async (file) => {
+          // Upload to Cloudinary (or switch to uploadToDigitalOcean if needed)
+          const uploaded = await fileUploader.uploadToCloudinary(file);
+          return uploaded.Location;
+        })
+      );
+      imageUrls = uploads;
+    }
+  
+    // Combine user data with image URLs
+    const userPayload = {
+      ...body,
+      images: imageUrls,
+    };
+  
+    const result = await ProductService.updateProduct(userPayload, req.params.id);
+  
     res.status(200).json(result);
   } catch (error: any) {
     res.status(error.statusCode || 500).json({
@@ -56,9 +104,12 @@ const getAllPrices = async (req: Request, res: Response) => {
 }
 
 
+
 export const ProductController = {
   createProduct,
   getAllPrices,
+  deleteProduct,
+    updateProduct
 };
 
 
@@ -93,7 +144,6 @@ export const ProductController = {
 //   data: product,
 // });
 // });
-
 
 
 

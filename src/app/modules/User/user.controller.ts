@@ -46,7 +46,7 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
     );
     imageUrls = uploads;
   }
-
+ 
   // Combine user data with image URLs
   const userPayload = {
     ...body,
