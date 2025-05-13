@@ -24,6 +24,31 @@ router.post(
 router.get("/:id", auth(UserRole.Customer), ProductController.getAllPrices);
 router.delete("/:id", auth(UserRole.Customer), ProductController.deleteProduct);
 router.put("/:id", auth(UserRole.Customer), ProductController.updateProduct);
+
+
+router.get("/", auth(UserRole.Provider), ProductController.getNearbyProducts);
+router.post(
+  "/accept-product/:id",
+  auth(UserRole.Provider),
+  ProductController.acceptProduct
+);
+router.post(
+  "/reject-product/:id",
+  auth(UserRole.Provider),
+  ProductController.rejectProduct
+);
+router.post(
+  "/complete-product/:id",
+  auth(UserRole.Provider),
+  ProductController.completeProduct
+);
+router.get(
+  "/my-products/:id",
+  auth(UserRole.Customer),
+  ProductController.getMyProducts
+);
+
+
 // router.post("/", fileUploader.uploadSingle, handleCreateProduct);
 // router.get("/get-product/:id", auth(UserRole.Customer), ProductController.getAllPrices);
 

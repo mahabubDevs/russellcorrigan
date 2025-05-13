@@ -11,12 +11,16 @@ export const initiateSuperAdmin = async () => {
     // phoneNumber: "1234567890",
     password: hashedPassword,
     role: UserRole.Customer,
+    lat: 23.8103,
+    lng: 90.4125,
   };
 
   const isExistUser = await prisma.user.findUnique({
     where: {
       // username: payload.username,
       email: payload.email,
+     
+
     },
   });
 

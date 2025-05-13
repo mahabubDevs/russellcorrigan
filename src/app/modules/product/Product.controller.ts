@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import { ProductService} from "./Product.service";
 import { fileUploader } from "../../../helpars/fileUploader";
-
+import  haversine  from "../../../shared/haversine";
+import prisma from "../../../shared/prisma";
+import { ProductStatus } from "@prisma/client";
 
 // PriceCalculation করতে গেলে UserId সহ ডেটা নিতে হবে
 const createProduct = async (req: Request, res: Response) => {
@@ -103,13 +105,113 @@ const updateProduct = async (req: Request, res: Response) => {
   }
 }
 
+// Provider: Get nearby products
+ const getNearbyProducts = async (req: Request, res: Response) => {
+  const { lat, lng } = req.query;
+
+  const all = await prisma.createProduct.findMany({
+    where: { status: ProductStatus.PENDING },
+  });
+
+  const filtered = all.filter((p) =>
+    haversine(
+      { lat: Number(lat), lng: Number(lng) },
+      { lat: p.lat, lng: p.lng },
+      5 // 5 km radius
+    )
+  );
+
+  res.json(filtered);
+};
+
+// Provider: Accept product
+ const acceptProduct = async (req: Request, res: Response) => {
+  const providerId = req.user.id;
+  const productId = req.params.id;
+
+  const product = await prisma.createProduct.update({
+    where: { id: productId },
+    data: {
+      providerId,
+      status: ProductStatus.ACCEPTED,
+    },
+  });
+
+  res.json({ product });
+};
+
+// Provider: Complete product
+ const completeProduct = async (req: Request, res: Response) => {
+  const productId = req.params.id;
+  const { completedImages } = req.body;
+
+  const updated = await prisma.createProduct.update({
+    where: { id: productId },
+    data: {
+      status: ProductStatus.COMPLETED,
+      completedImages,
+    },
+  });
+
+  res.json({ message: 'Project marked as completed', updated });
+};
+
+// Customer: Get my created products
+export const getMyProducts = async (req: Request, res: Response) => {
+  const userId = req.user.id;
+
+  const myProducts = await prisma.createProduct.findMany({
+    where: { userId },
+  });
+
+  res.json(myProducts);
+};
+
+
+ const rejectProduct = async (req: Request, res: Response) => {
+  const productId = req.params.id;
+  const providerId = req.user.id;
+
+  try {
+    const product = await prisma.createProduct.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    if (product.status !== 'PENDING') {
+      return res.status(400).json({ error: 'Product is not pending' });
+    }
+
+    const updated = await prisma.createProduct.update({
+      where: { id: productId },
+      data: {
+        status: 'PENDING', // অথবা যদি REJECTED রাখতে চাও enum-এ যুক্ত করতে হবে
+        providerId: '', // বা null, যেহেতু reject করছে
+      },
+    });
+
+    return res.json({ message: 'Product rejected', updated });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
 
 
 export const ProductController = {
   createProduct,
   getAllPrices,
   deleteProduct,
-    updateProduct
+  updateProduct,
+  getNearbyProducts,
+  acceptProduct,
+  rejectProduct,
+  completeProduct,
+  getMyProducts,
+
 };
 
 

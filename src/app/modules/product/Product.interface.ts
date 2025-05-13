@@ -18,6 +18,11 @@ export interface CreateProductRequest {
   basePrice: number;
   additionsPrice: number;
   totalPrice: number;
+
+  status: "pending" | "accepted" | "completed" | "rejected";
+  providerId?: string; // Add providerId here
+  completedImages?: string[]; // Add completedImages here
+  createdAt?: Date;
 }
 
 

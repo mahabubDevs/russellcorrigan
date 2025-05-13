@@ -16,6 +16,8 @@ model User {
   email         String     @unique
   phoneNumber   String?    
   images        String[]
+  lat            Float
+  lng            Float
   profileImage  String?
   expirationOtp DateTime?
   otp           Int?
@@ -29,8 +31,8 @@ model User {
   status        UserStatus @default(ACTIVE)
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
-  offersSent    OfferDetails[] @relation("SenderRelation")
-  offersReceived OfferDetails[] @relation("ReceiverRelation")
+  // offersSent    OfferDetails[] @relation("SenderRelation")
+  // offersReceived OfferDetails[] @relation("ReceiverRelation")
   isOnboarding  Boolean    @default(false)
   emailVerified                 Boolean  @default(false)
   emailVerificationToken        String?
@@ -64,17 +66,21 @@ model CreateProduct {
   isSteep         Boolean?
   isPriority      Boolean?
   images        String[]
+  completedImages String[]
 
   basePrice       Int
   additionsPrice  Int
   totalPrice      Int
 
 
+  providerId      String
+  status         ProductStatus  @default(PENDING)
 
   createdAt       DateTime @default(now())
 
   userId          String   @db.ObjectId
   user            User     @relation(fields: [userId], references: [id])
+   
 
   @@map("CreateProduct")
 }
@@ -136,11 +142,11 @@ model Payment {
 }
 
 
-enum OfferStatus {
+enum ProductStatus {
   PENDING
   ACCEPTED
-  REJECTED
   COMPLETED
+  REJECTED
 }
 
 
@@ -152,18 +158,18 @@ enum PaymentStatus {
 }
 
 
-model OfferDetails {
-  id          String      @id @default(auto()) @map("_id") @db.ObjectId
-  amount      Float
-  status      OfferStatus
-  description String?      @default("")
-  senderId    String       @db.ObjectId
-  receiverId  String       @db.ObjectId
-  sender      User         @relation("SenderRelation", fields: [senderId], references: [id])
-  receiver    User         @relation("ReceiverRelation", fields: [receiverId], references: [id])
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+// model OfferDetails {
+//   id          String      @id @default(auto()) @map("_id") @db.ObjectId
+//   amount      Float
+//   status      OfferStatus
+//   description String?      @default("")
+//   senderId    String       @db.ObjectId
+//   receiverId  String       @db.ObjectId
+//   sender      User         @relation("SenderRelation", fields: [senderId], references: [id])
+//   receiver    User         @relation("ReceiverRelation", fields: [receiverId], references: [id])
+//   createdAt   DateTime     @default(now())
+//   updatedAt   DateTime     @updatedAt
 
-  @@map("offerDetails")
-}
+//   @@map("offerDetails")
+// }
 
