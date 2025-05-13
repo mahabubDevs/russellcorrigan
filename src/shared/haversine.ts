@@ -3,7 +3,7 @@ interface Location {
   lng: number;
 }
 
-export default function haversine(from: Location, to: Location, km = 5): boolean {
+export default function haversine(from: Location, to: Location, km = 20000000): boolean {
   const toRad = (x: number) => (x * Math.PI) / 180;
   const R = 6371;
 

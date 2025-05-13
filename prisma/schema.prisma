@@ -16,8 +16,8 @@ model User {
   email         String     @unique
   phoneNumber   String?    
   images        String[]
-  lat            Float
-  lng            Float
+  lat            Float?
+  lng            Float?
   profileImage  String?
   expirationOtp DateTime?
   otp           Int?
@@ -38,6 +38,7 @@ model User {
   emailVerificationToken        String?
   otpExpiresAt  DateTime?
 
+  rejectedProducts RejectedProduct[]  
   // Reverse relation field
   Product CreateProduct[]  // Adding reverse relation
 
@@ -76,6 +77,8 @@ model CreateProduct {
   providerId      String
   status         ProductStatus  @default(PENDING)
 
+  rejectedBy       RejectedProduct[]  
+
   createdAt       DateTime @default(now())
 
   userId          String   @db.ObjectId
@@ -86,6 +89,19 @@ model CreateProduct {
 }
 
 
+
+model RejectedProduct {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  productId   String   @db.ObjectId
+  providerId  String   @db.ObjectId
+  rejectedAt  DateTime @default(now())
+
+  product     CreateProduct @relation(fields: [productId], references: [id])
+  provider    User          @relation(fields: [providerId], references: [id])
+
+  @@map("RejectedProduct")
+}
 
 
 

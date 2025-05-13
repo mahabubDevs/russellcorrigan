@@ -108,6 +108,9 @@ const updateProduct = async (req: Request, res: Response) => {
 // Provider: Get nearby products
  const getNearbyProducts = async (req: Request, res: Response) => {
   const { lat, lng } = req.query;
+  console.log("lat", lat)
+  console.log("lng", lng)
+  console.log("body", req.query)
 
   const all = await prisma.createProduct.findMany({
     where: { status: ProductStatus.PENDING },
@@ -168,9 +171,9 @@ export const getMyProducts = async (req: Request, res: Response) => {
 };
 
 
- const rejectProduct = async (req: Request, res: Response) => {
+const rejectProduct = async (req: Request, res: Response) => {
   const productId = req.params.id;
-  const providerId = req.user.id;
+  const providerId = req.user.id; // ✅ নিশ্চিত করুন middleware দিয়ে req.user আছে
 
   try {
     const product = await prisma.createProduct.findUnique({
@@ -185,19 +188,55 @@ export const getMyProducts = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Product is not pending' });
     }
 
-    const updated = await prisma.createProduct.update({
-      where: { id: productId },
-      data: {
-        status: 'PENDING', // অথবা যদি REJECTED রাখতে চাও enum-এ যুক্ত করতে হবে
-        providerId: '', // বা null, যেহেতু reject করছে
+    // ✅ একই provider আগে reject করেছে কিনা, চেক করুন
+    const alreadyRejected = await prisma.rejectedProduct.findFirst({
+      where: {
+        productId,
+        providerId,
       },
     });
 
-    return res.json({ message: 'Product rejected', updated });
+    if (alreadyRejected) {
+      return res.status(400).json({ error: 'You have already rejected this product' });
+    }
+
+    // ✅ RejectedProduct টেবিলে এন্ট্রি তৈরি করুন
+    await prisma.rejectedProduct.create({
+      data: {
+        productId,
+        providerId,
+      },
+    });
+
+    return res.json({ message: 'Product rejected successfully' });
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
   }
 };
+
+const getPendingProducts = async (req: Request, res: Response) => {
+  const providerId = req.user.id;
+
+  try {
+    const products = await prisma.createProduct.findMany({
+      where: {
+        status: 'PENDING',
+        NOT: {
+          rejectedBy: {
+            some: {
+              providerId: providerId,
+            },
+          },
+        },
+      },
+    });
+
+    return res.json(products);
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
 
 
 
@@ -211,6 +250,7 @@ export const ProductController = {
   rejectProduct,
   completeProduct,
   getMyProducts,
+  getPendingProducts
 
 };
 
