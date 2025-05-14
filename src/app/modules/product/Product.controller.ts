@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
 import { ProductService} from "./Product.service";
 import { fileUploader } from "../../../helpars/fileUploader";
-import  haversine  from "../../../shared/haversine";
+// import  haversine  from "../../../shared/haversine";
 import prisma from "../../../shared/prisma";
 import { ProductStatus } from "@prisma/client";
 import ApiError from "../../../errors/ApiErrors";
 import catchAsync from "../../../shared/catchAsync";
 import { userService } from "../User/user.services";
+import haversine from "haversine-distance"
 
 // PriceCalculation করতে গেলে UserId সহ ডেটা নিতে হবে
 const createProduct = async (req: Request, res: Response) => {
@@ -109,25 +110,66 @@ const updateProduct = async (req: Request, res: Response) => {
 }
 
 // Provider: Get nearby products
- const getNearbyProducts = async (req: Request, res: Response) => {
-  const { lat, lng } = req.query;
-  console.log("lat", lat)
-  console.log("lng", lng)
-  console.log("body", req.query)
+//  const getNearbyProducts = async (req: Request, res: Response) => {
+//   const { lat, lng } = req.query;
+//   console.log("lat", lat)
+//   console.log("lng", lng)
+//   console.log("body", req.query)
 
-  const all = await prisma.createProduct.findMany({
-    where: { status: ProductStatus.PENDING },
+//   const all = await prisma.createProduct.findMany({
+//     where: { status: ProductStatus.PENDING },
+//   });
+
+//   const filtered = all.filter((p) =>
+//     haversine(
+//       { lat: Number(lat), lng: Number(lng) },
+//       { lat: p.lat, lng: p.lng },
+//       5000 // 5 km radius
+//     )
+//   );
+
+//   res.json(filtered);
+// };
+
+
+
+export const getNearbyProducts = async (req: Request, res: Response) => {
+  const { lat, lng } = req.query;
+
+  if (!lat || !lng) {
+    return res.status(400).json({ message: "Latitude and Longitude required" });
+  }
+
+  const userLocation = {
+    lat: parseFloat(lat as string),
+    lng: parseFloat(lng as string),
+  };
+
+  // Step 1: All pending products
+  const allProducts = await prisma.createProduct.findMany({
+    where: { status: 'PENDING' },
   });
 
-  const filtered = all.filter((p) =>
-    haversine(
-      { lat: Number(lat), lng: Number(lng) },
-      { lat: p.lat, lng: p.lng },
-      5000 // 5 km radius
-    )
-  );
+  // Step 2: Map with distance calculation
+  const withDistance = allProducts.map((product) => {
+    const productLocation = {
+      lat: product.lat,
+      lng: product.lng,
+    };
 
-  res.json(filtered);
+    const distance = haversine(userLocation, productLocation); // in meters
+
+    return {
+      ...product,
+      distance,
+    };
+  });
+
+  // Step 3: Sort by distance (ascending)
+  const sortedProducts = withDistance.sort((a, b) => a.distance - b.distance);
+
+  // Step 4: Return result
+  res.status(200).json(sortedProducts);
 };
 
 // Provider: Accept product

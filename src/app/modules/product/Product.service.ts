@@ -68,7 +68,9 @@ const createProduct = async (data: CreateProductRequest, imageUrls: string[] ) =
     additionsPrice = calculateAdditionsPrice(data);
   }
 
-  const totalPrice = basePrice + additionsPrice;
+  const vat = basePrice * 0.1
+
+  const totalPrice = basePrice + additionsPrice + vat;
 
 //   // Save to database and associate with the user
  const product =  await prisma.createProduct.create({
@@ -85,23 +87,20 @@ const createProduct = async (data: CreateProductRequest, imageUrls: string[] ) =
     extraFeet: data.extraFeet || 0,
     isSteep: data.isSteep || false,
     isPriority: data.isPriority || false,
-    basePrice: data.basePrice || 0,
-    additionsPrice: data.additionsPrice || 0,
-    totalPrice: data.totalPrice || 0,
+    basePrice: basePrice || 0,
+    additionsPrice: additionsPrice || 0,
+    totalPrice: totalPrice || 0,
     userId: data.userId,
     images: imageUrls || [], // Save images if provided
-    providerId: data.providerId
+    providerId: data.providerId,
+    comment: data.comment 
   },
 });
 
 
   return {
     product,
-    address: data.address,
-    location: data.location,
-    basePrice,
-    additionsPrice,
-    totalPrice,
+    vat
   };
 };
 

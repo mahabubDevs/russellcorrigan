@@ -28,17 +28,17 @@ router.put("/:id", auth(UserRole.Customer), ProductController.updateProduct);
 
 router.get("/", auth(UserRole.Provider), ProductController.getNearbyProducts);
 router.post(
-  "/accept-product/:id",
+  "/accept-service/:id",
   auth(UserRole.Provider),
   ProductController.acceptProduct
 );
 router.post(
-  "/reject-product/:id",
+  "/reject-service/:id",
   auth(UserRole.Provider),
   ProductController.rejectProduct
 );
 router.post(
-  "/complete-product/:id",
+  "/complete-service/:id",
   auth(UserRole.Provider),
   ProductController.completeProduct
 );
@@ -46,7 +46,7 @@ router.post(
 router.put ("/upload-image/:id", auth(UserRole.Provider),fileUploader.uploadMultipleImage, ProductController.updateProjectImage  )
 
 router.get(
-  "/my-products/:id",
+  "/my-service/:id",
   auth(UserRole.Customer),
   ProductController.getMyProducts
 );

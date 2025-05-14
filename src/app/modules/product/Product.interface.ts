@@ -16,6 +16,7 @@ export interface CreateProductRequest {
   isPriority?: boolean;
   userId: string; // Add userId here
   images?: string[]; // Add images here
+  comment?: string;
   
  
 

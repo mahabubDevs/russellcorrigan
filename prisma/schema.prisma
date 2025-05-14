@@ -41,7 +41,10 @@ model User {
   rejectedProducts RejectedProduct[]  
   // Reverse relation field
   Product CreateProduct[]  // Adding reverse relation
+  reviews       Review[]    @relation("UserReviews")
+  customerReviews Review[]  @relation("CustomerReviews")
 
+  
   @@map("Users")
 }
 
@@ -67,6 +70,7 @@ model CreateProduct {
   isSteep         Boolean?
   isPriority      Boolean?
   images        String[]
+  comment         String?
   completedImages String[]
 
   basePrice       Int
@@ -74,7 +78,7 @@ model CreateProduct {
   totalPrice      Int
 
 
-  providerId      String
+  providerId      String?
   status         ProductStatus  @default(PENDING)
 
   rejectedBy       RejectedProduct[]  
@@ -83,7 +87,9 @@ model CreateProduct {
 
   userId          String   @db.ObjectId
   user            User     @relation(fields: [userId], references: [id])
-   
+  
+  review          Review?
+
 
   @@map("CreateProduct")
 }
@@ -104,27 +110,28 @@ model RejectedProduct {
 }
 
 
+model Review {
+  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  rating      Int
+  comment     String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // ✅ এখানে projectId এবং annotation ঠিক করে দিচ্ছি
+  createProjectId   String         @db.ObjectId @unique
+  createProject     CreateProduct  @relation(fields: [createProjectId], references: [id]) 
 
 
+  providerId  String         @db.ObjectId
+  provider    User           @relation("UserReviews", fields: [providerId], references: [id])
 
+  customerId  String         @db.ObjectId
+  customer    User           @relation("CustomerReviews", fields: [customerId], references: [id])
 
-
-
-
-
-
-
-enum UserRole {
-  Customer
-  Provider
-  Admin
+  @@map("reviews")
 }
 
-enum UserStatus {
-  ACTIVE
-  INACTIVE
-  BLOCKED
-}
+
 
 model Notification {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -155,6 +162,18 @@ model Payment {
   updatedAt     DateTime      @updatedAt
 
   @@map("payments")
+}
+
+enum UserRole {
+  Customer
+  Provider
+  Admin
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
 }
 
 
