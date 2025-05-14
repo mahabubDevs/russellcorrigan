@@ -193,18 +193,18 @@ enum PaymentStatus {
 }
 
 
-// model OfferDetails {
-//   id          String      @id @default(auto()) @map("_id") @db.ObjectId
-//   amount      Float
-//   status      OfferStatus
-//   description String?      @default("")
-//   senderId    String       @db.ObjectId
-//   receiverId  String       @db.ObjectId
-//   sender      User         @relation("SenderRelation", fields: [senderId], references: [id])
-//   receiver    User         @relation("ReceiverRelation", fields: [receiverId], references: [id])
-//   createdAt   DateTime     @default(now())
-//   updatedAt   DateTime     @updatedAt
+model OfferDetails {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  amount      Float
+  // status      OfferStatus
+  description String?      @default("")
+  senderId    String       @db.ObjectId
+  receiverId  String       @db.ObjectId
+  // sender      User         @relation("SenderRelation", fields: [senderId], references: [id])
+  // receiver    User         @relation("ReceiverRelation", fields: [receiverId], references: [id])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
-//   @@map("offerDetails")
-// }
+  @@map("offerDetails")
+}
 
