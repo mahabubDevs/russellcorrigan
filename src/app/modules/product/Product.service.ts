@@ -4,6 +4,7 @@ import ApiError from "../../../errors/ApiErrors";
 import httpStatus from "http-status";
 
 import { CreateProductRequest,ProductResponse } from "./Product.interface";
+import { ProductStatus } from "@prisma/client";
 
 
 const getBasePrice = (area: number): number => {
@@ -89,6 +90,7 @@ const createProduct = async (data: CreateProductRequest, imageUrls: string[] ) =
     totalPrice: data.totalPrice || 0,
     userId: data.userId,
     images: imageUrls || [], // Save images if provided
+    providerId: data.providerId
   },
 });
 
@@ -170,7 +172,24 @@ const updateProduct = async ( data: CreateProductRequest, id: string,) => {
     return updatedProduct;
 }
 
+const updateProjectImage = async (providerId: string, imageUrls: string[], productId:string) => {
+  const user = await prisma.user.findUnique({ where: { id: providerId } });
 
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const updatedProduct = await prisma.createProduct.update({
+    where: { id: productId},
+    data: {
+      completedImages: { push: imageUrls }, 
+      status: ProductStatus.COMPLETED  // Push new images to the existing array
+    },
+    
+  });
+
+  return updatedProduct;
+};
 
 
 export const ProductService = {
@@ -178,7 +197,8 @@ export const ProductService = {
   getPriceById,
   getAll,
   deleteProduct,
-  updateProduct
+  updateProduct,
+  updateProjectImage
 };
 
 

@@ -1,5 +1,7 @@
+import { ProductStatus } from "@prisma/client";
+
 export interface CreateProductRequest {
-    id: string;
+  id: string;
   serviceType: "snow" | "lawn";
   address: string;
   location: string;
@@ -14,13 +16,15 @@ export interface CreateProductRequest {
   isPriority?: boolean;
   userId: string; // Add userId here
   images?: string[]; // Add images here
+  
+ 
 
   basePrice: number;
   additionsPrice: number;
   totalPrice: number;
 
-  status: "pending" | "accepted" | "completed" | "rejected";
-  providerId?: string; // Add providerId here
+  status: ProductStatus;
+  providerId: string; // Add providerId here
   completedImages?: string[]; // Add completedImages here
   createdAt?: Date;
 }

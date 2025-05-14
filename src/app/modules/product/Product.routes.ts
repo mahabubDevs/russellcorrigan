@@ -42,6 +42,9 @@ router.post(
   auth(UserRole.Provider),
   ProductController.completeProduct
 );
+
+router.put ("/upload-image/:id", auth(UserRole.Provider),fileUploader.uploadMultipleImage, ProductController.updateProjectImage  )
+
 router.get(
   "/my-products/:id",
   auth(UserRole.Customer),

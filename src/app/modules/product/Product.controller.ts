@@ -4,6 +4,9 @@ import { fileUploader } from "../../../helpars/fileUploader";
 import  haversine  from "../../../shared/haversine";
 import prisma from "../../../shared/prisma";
 import { ProductStatus } from "@prisma/client";
+import ApiError from "../../../errors/ApiErrors";
+import catchAsync from "../../../shared/catchAsync";
+import { userService } from "../User/user.services";
 
 // PriceCalculation করতে গেলে UserId সহ ডেটা নিতে হবে
 const createProduct = async (req: Request, res: Response) => {
@@ -120,7 +123,7 @@ const updateProduct = async (req: Request, res: Response) => {
     haversine(
       { lat: Number(lat), lng: Number(lng) },
       { lat: p.lat, lng: p.lng },
-      5 // 5 km radius
+      5000 // 5 km radius
     )
   );
 
@@ -159,8 +162,40 @@ const updateProduct = async (req: Request, res: Response) => {
   res.json({ message: 'Project marked as completed', updated });
 };
 
+// image upload
+const updateProjectImage = catchAsync(async (req: Request, res: Response) => {
+  const productId = req.params.id;
+  const providerId = req.user.id
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+  // if not found any image
+  if (!files?.images || files.images.length === 0) {
+    throw new ApiError(400, "No images found"); 
+  }
+
+  // Every image upload to cloudinary
+  const imageUrls = await Promise.all(
+    files.images.map(async (file) => {
+      const uploaded = await fileUploader.uploadToCloudinary(file);
+      return uploaded.Location;
+    })
+  );
+
+  // service call to update user document
+  const user = await ProductService.updateProjectImage (providerId, imageUrls, productId);
+
+  res.status(200).json({
+    success: true,
+    message: "successfully updated user document!",
+    data: user,
+  });
+});
+
+
+
+
 // Customer: Get my created products
-export const getMyProducts = async (req: Request, res: Response) => {
+ const getMyProducts = async (req: Request, res: Response) => {
   const userId = req.user.id;
 
   const myProducts = await prisma.createProduct.findMany({
@@ -250,7 +285,8 @@ export const ProductController = {
   rejectProduct,
   completeProduct,
   getMyProducts,
-  getPendingProducts
+  getPendingProducts,
+  updateProjectImage
 
 };
 
