@@ -25,10 +25,10 @@ const moduleRoutes = [
     path: "/services",
     route: ProductRoutes,
   },
-  {
-    path: "/reviews",
-    route: ReviewRoutes,
-  },
+  // {
+  //   path: "/reviews",
+  //   route: ReviewRoutes,
+  // },
 
 ];
 
