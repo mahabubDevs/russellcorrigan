@@ -196,7 +196,7 @@ enum PaymentStatus {
 model OfferDetails {
   id          String      @id @default(auto()) @map("_id") @db.ObjectId
   amount      Float
-  // status      OfferStatus
+  status      OfferStatus @default(PENDING)
   description String?      @default("")
   senderId    String       @db.ObjectId
   receiverId  String       @db.ObjectId
@@ -208,3 +208,8 @@ model OfferDetails {
   @@map("offerDetails")
 }
 
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
