@@ -41,12 +41,28 @@ model User {
   rejectedProducts RejectedProduct[]  
   // Reverse relation field
   Product CreateProduct[]  // Adding reverse relation
+  Property      Property[]
 
   @@map("Users")
 }
 
 
+model Property {
+  id          String      @id @default(auto()) @map("_id")  @db.ObjectId
 
+  address     String?
+  location    String?
+  perimeter       Int
+  area            Int
+  lat            Float
+  lng            Float
+  basePrice      Float
+  userId          String   @db.ObjectId
+  user            User     @relation(fields: [userId], references: [id])
+  
+  @@map("Property")
+
+}
 
 
 
