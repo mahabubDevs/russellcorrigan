@@ -211,5 +211,6 @@ model OfferDetails {
 enum OfferStatus {
   PENDING
   ACCEPTED
+  COMPLETED  // ✅ এটা যোগ করো যদি দরকার হয়
   REJECTED
 }
