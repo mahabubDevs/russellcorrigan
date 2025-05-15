@@ -59,6 +59,7 @@ model Property {
   basePrice      Float
   userId          String   @db.ObjectId
   user            User     @relation(fields: [userId], references: [id])
+  products        CreateProduct[]
   
   @@map("Property")
 
@@ -69,14 +70,7 @@ model Property {
 model CreateProduct {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
 
-  address         String?
-  location       String?
-
   serviceType     String
-  perimeter       Int
-  area            Int
-  lat            Float
-  lng            Float
   driveways       String[]
   isCornerLot     Boolean?
   extraFeet       Int?
@@ -85,12 +79,11 @@ model CreateProduct {
   images        String[]
   completedImages String[]
 
-  basePrice       Int
   additionsPrice  Int
   totalPrice      Int
 
 
-  providerId      String
+  providerId      String?
   status         ProductStatus  @default(PENDING)
 
   rejectedBy       RejectedProduct[]  
@@ -99,6 +92,10 @@ model CreateProduct {
 
   userId          String   @db.ObjectId
   user            User     @relation(fields: [userId], references: [id])
+
+
+  propertyId     String     @db.ObjectId
+  propertyDetails  Property  @relation(fields: [propertyId], references: [id])
    
 
   @@map("CreateProduct")

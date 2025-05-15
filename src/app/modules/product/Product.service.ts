@@ -4,19 +4,19 @@ import ApiError from "../../../errors/ApiErrors";
 import httpStatus from "http-status";
 
 import { CreateProductRequest,ProductResponse } from "./Product.interface";
-import { ProductStatus } from "@prisma/client";
+import { ProductStatus, Property } from "@prisma/client";
 
 
-const getBasePrice = (area: number): number => {
-  if (area <= 3000) return 45 + 45 * 0.10;       // $45 + 10%
-  if (area <= 5000) return 65 + 65 * 0.10;       // $65 + 10%
-  if (area <= 8000) return 85 + 85 * 0.10;       // $85 + 10%
-  if (area <= 12000) return 100 + 100 * 0.10;    // $100 + 10%
+// const getBasePrice = (area: number): number => {
+//   if (area <= 3000) return 45 + 45 * 0.10;       // $45 + 10%
+//   if (area <= 5000) return 65 + 65 * 0.10;       // $65 + 10%
+//   if (area <= 8000) return 85 + 85 * 0.10;       // $85 + 10%
+//   if (area <= 12000) return 100 + 100 * 0.10;    // $100 + 10%
 
-  // If area is larger, calculate per square foot
-  const base = area * 0.01;                      // Assume $0.01 per sq ft
-  return base + base * 0.10;                     // + 10% extra
-};
+//   // If area is larger, calculate per square foot
+//   const base = area * 0.01;                      // Assume $0.01 per sq ft
+//   return base + base * 0.10;                     // + 10% extra
+// };
 
 const calculateAdditionsPrice = (data: any): number => {
   let additions = 0;
@@ -48,7 +48,7 @@ const calculateAdditionsPrice = (data: any): number => {
 };
 
 
-const createProduct = async (data: CreateProductRequest, imageUrls: string[] ) => {
+const createProduct = async (data: CreateProductRequest, imageUrls: string[],property:Property ) => {
   console.log("Calculating price for data:", data);
 
   // Ensure we have userId for tracking purposes
@@ -56,7 +56,8 @@ const createProduct = async (data: CreateProductRequest, imageUrls: string[] ) =
     throw new ApiError(httpStatus.BAD_REQUEST, "User ID is required.");
   }
 
-  const basePrice = getBasePrice(data.area);
+  const basePrice = property.basePrice;
+  const vat = basePrice * 0.1
 
   if (basePrice === 0) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Custom quote area. Please contact support.");
@@ -64,7 +65,7 @@ const createProduct = async (data: CreateProductRequest, imageUrls: string[] ) =
 
   let additionsPrice = 0;
 
-  if (data.serviceType === "snow") {
+  if (data.serviceType === "snow" || "lawn") {
     additionsPrice = calculateAdditionsPrice(data);
   }
 
@@ -74,34 +75,35 @@ const createProduct = async (data: CreateProductRequest, imageUrls: string[] ) =
  const product =  await prisma.createProduct.create({
   data: {
     serviceType: data.serviceType || "snow",
-    address: data.address || "Unknown Address", 
-    location: data.location || "Unknown",        
-    perimeter: data.perimeter || 0,              
-    area: data.area,
-    lat: isNaN(Number(data.lat)) ? 0 : Number(data.lat),  
-    lng: isNaN(Number(data.lng)) ? 0 : Number(data.lng),  
+   
+   
     driveways: data.driveways || [],
     isCornerLot: data.isCornerLot || false,
     extraFeet: data.extraFeet || 0,
     isSteep: data.isSteep || false,
     isPriority: data.isPriority || false,
-    basePrice: data.basePrice || 0,
-    additionsPrice: data.additionsPrice || 0,
-    totalPrice: data.totalPrice || 0,
+
+    additionsPrice: additionsPrice || 0,
+    totalPrice: totalPrice || 0,
     userId: data.userId,
     images: imageUrls || [], // Save images if provided
-    providerId: data.providerId
+    providerId: data.providerId,
+    propertyId: property.id,
   },
+  include: {
+    propertyDetails: true,
+  }
 });
 
 
   return {
     product,
-    address: data.address,
-    location: data.location,
-    basePrice,
-    additionsPrice,
-    totalPrice,
+    vat
+    // address: data.address,
+    // location: data.location,
+    // basePrice,
+    // additionsPrice,
+    // totalPrice,
   };
 };
 
@@ -111,17 +113,14 @@ const getAll = async (userId: string) => {
   });
   return prices.map((price) => ({
     id: price.id,
-    address: price.address,
-    location: price.location,
-    serviceType: price.serviceType,
-    perimeter: price.perimeter,
-    area: price.area,
+  
+ 
     driveways: price.driveways,
     isCornerLot: price.isCornerLot,
     extraFeet: price.extraFeet,
     isSteep: price.isSteep,
     isPriority: price.isPriority,
-    basePrice: price.basePrice,
+
     additionsPrice: price.additionsPrice,
     totalPrice: price.totalPrice,
     images: price.images || [],

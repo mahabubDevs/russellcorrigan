@@ -13,7 +13,7 @@ const router = express.Router();
 
 // Price Calculation Route
 router.post(
-  "/",
+  "/:propertyId",
   auth(UserRole.Customer),
   fileUploader.uploadMultipleImage,
   ProductvalidateRequest(ProductValidation.productValidationSchema),
@@ -26,7 +26,7 @@ router.delete("/:id", auth(UserRole.Customer), ProductController.deleteProduct);
 router.put("/:id", auth(UserRole.Customer), ProductController.updateProduct);
 
 
-router.get("/", auth(UserRole.Provider), ProductController.getNearbyProducts);
+// router.get("/", auth(UserRole.Provider), ProductController.getNearbyProducts);
 router.post(
   "/accept-product/:id",
   auth(UserRole.Provider),

@@ -36,11 +36,21 @@ const createProduct = async (req: Request, res: Response) => {
     // আগে থেকেই userId req.body তে পাস করা হলে, তা priceCalculation এ সঠিকভাবে অন্তর্ভুক্ত হবে
 
     console.log("calculatePrice try", req.body);
+    const property = await prisma.property.findUnique({
+      where: {id: req.params.propertyId},
+    })
+
+    if (!property) {
+      return res.status(404).json({ message: "Property not found" });
+    }
 
     // PriceCalculation করার সময় req.body তে userId থাকতে হবে
-    const result = await ProductService.createProduct(req.body,imageUrls);
+    const result = await ProductService.createProduct(req.body,imageUrls,property);
     console.log("calculatePrice result", result);
-    res.status(200).json(result);
+    res.status(200).json({
+      message: "Service create successfully",
+      result,
+    });
   } catch (error: any) {
     res.status(error.statusCode || 500).json({
       message: error.message || "Something went wrong",
@@ -109,26 +119,26 @@ const updateProduct = async (req: Request, res: Response) => {
 }
 
 // Provider: Get nearby products
- const getNearbyProducts = async (req: Request, res: Response) => {
-  const { lat, lng } = req.query;
-  console.log("lat", lat)
-  console.log("lng", lng)
-  console.log("body", req.query)
+//  const getNearbyProducts = async (req: Request, res: Response) => {
+//   const { lat, lng } = req.query;
+//   console.log("lat", lat)
+//   console.log("lng", lng)
+//   console.log("body", req.query)
 
-  const all = await prisma.createProduct.findMany({
-    where: { status: ProductStatus.PENDING },
-  });
+//   const all = await prisma.createProduct.findMany({
+//     where: { status: ProductStatus.PENDING },
+//   });
 
-  const filtered = all.filter((p) =>
-    haversine(
-      { lat: Number(lat), lng: Number(lng) },
-      { lat: p.lat, lng: p.lng },
-      5000 // 5 km radius
-    )
-  );
+//   const filtered = all.filter((p) =>
+//     haversine(
+//       { lat: Number(lat), lng: Number(lng) },
+//       { lat: p.lat, lng: p.lng },
+//       5000 // 5 km radius
+//     )
+//   );
 
-  res.json(filtered);
-};
+//   res.json(filtered);
+// };
 
 // Provider: Accept product
  const acceptProduct = async (req: Request, res: Response) => {
@@ -280,7 +290,7 @@ export const ProductController = {
   getAllPrices,
   deleteProduct,
   updateProduct,
-  getNearbyProducts,
+  // getNearbyProducts,
   acceptProduct,
   rejectProduct,
   completeProduct,

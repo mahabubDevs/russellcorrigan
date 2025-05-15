@@ -18,35 +18,6 @@ const getBasePrice = (area: number): number => {
   return base + base * 0.10;                     // + 10% extra
 };
 
-// const calculateAdditionsPrice = (data: any): number => {
-//   let additions = 0;
-
-//   // Driveways
-//   if (data.driveways && data.driveways.length > 0) {
-//     data.driveways.forEach((type:any) => {
-//       if (type === "1-car") additions += 45;
-//       if (type === "2-car") additions += 65;
-//       if (type === "3-car") additions += 85;
-//     });
-//   }
-
-
-//   if (data.isCornerLot) additions += 15;
-
-
-//   if (data.extraFeet && data.extraFeet > 0) {
-//     additions += Math.ceil(data.extraFeet / 20) * 10;
-//   }
-
-
-//   if (data.isSteep) additions += 15;
-
-//   // Priority
-//   if (data.isPriority) additions += 20;
-
-//   return additions;
-// };
-
 
 const createProperty = async (data: CreatePropertyInterface ) => {
   console.log("Calculating price for data:", data);
