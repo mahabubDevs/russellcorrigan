@@ -48,13 +48,13 @@ const calculateAdditionsPrice = (data: any): number => {
 };
 
 
-const createProduct = async (data: CreateProductRequest, imageUrls: string[] ) => {
+const createProduct = async (data: CreateProductRequest, imageUrls: string[] , userId:string) => {
   console.log("Calculating price for data:", data);
 
   // Ensure we have userId for tracking purposes
-  if (!data.userId) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "User ID is required.");
-  }
+  // if (!data.userId) {
+  //   throw new ApiError(httpStatus.BAD_REQUEST, "User ID is required.");
+  // }
 
   const basePrice = getBasePrice(data.area);
 
@@ -90,7 +90,7 @@ const createProduct = async (data: CreateProductRequest, imageUrls: string[] ) =
     basePrice: basePrice || 0,
     additionsPrice: additionsPrice || 0,
     totalPrice: totalPrice || 0,
-    userId: data.userId,
+    userId: userId,
     images: imageUrls || [], // Save images if provided
     providerId: data.providerId,
     comment: data.comment 

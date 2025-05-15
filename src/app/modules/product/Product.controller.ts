@@ -12,7 +12,7 @@ import haversine from "haversine-distance"
 // PriceCalculation করতে গেলে UserId সহ ডেটা নিতে হবে
 const createProduct = async (req: Request, res: Response) => {
   console.log("calculatePrice", req.body);
-
+  const user = req.user
 
   const files = req.files as { [fieldname: string]: Express.Multer.File[] };
      // Parse the JSON string from "data"
@@ -39,7 +39,7 @@ const createProduct = async (req: Request, res: Response) => {
     console.log("calculatePrice try", req.body);
 
     // PriceCalculation করার সময় req.body তে userId থাকতে হবে
-    const result = await ProductService.createProduct(req.body,imageUrls);
+    const result = await ProductService.createProduct(req.body,imageUrls,user.id);
     console.log("calculatePrice result", result);
     res.status(200).json(result);
   } catch (error: any) {
