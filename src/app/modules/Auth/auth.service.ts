@@ -9,11 +9,12 @@ import { UserRole, UserStatus } from "@prisma/client";
 import httpStatus from "http-status";
 import crypto from 'crypto';
 // user login
-const loginUser = async (payload: { email: string; password: string ; role: string  }) => {
+const loginUser = async (payload: { email: string; password: string ; role: string; fcmToken?: string }) => {
   const userData = await prisma.user.findFirst({
     where: {
       email: payload.email,
       role: payload.role as UserRole,
+      
     },
   });
   
