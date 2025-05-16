@@ -41,9 +41,11 @@ model User {
   otpExpiresAt  DateTime?
 
   rejectedProducts RejectedProduct[]  
-  // Reverse relation field
+  // Reverse relation 
   Product CreateProduct[]  // Adding reverse relation
   Property      Property[]
+   reviews       Review[]    @relation("UserReviews")
+  customerReviews Review[]  @relation("CustomerReviews")
 
   @@map("Users")
 }
@@ -99,6 +101,7 @@ model CreateProduct {
   propertyId     String     @db.ObjectId
   propertyDetails  Property  @relation(fields: [propertyId], references: [id])
    
+  review          Review?
 
   @@map("CreateProduct")
 }
@@ -119,7 +122,26 @@ model RejectedProduct {
 }
 
 
+model Review {
+  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  rating      Int
+  comment     String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
+  // ✅ এখানে projectId এবং annotation ঠিক করে দিচ্ছি
+  createProjectId   String         @db.ObjectId @unique
+  createProject     CreateProduct  @relation(fields: [createProjectId], references: [id]) 
+
+
+  providerId  String?         @db.ObjectId
+  provider    User?           @relation("UserReviews", fields: [providerId], references: [id])
+
+  customerId  String         @db.ObjectId
+  customer    User           @relation("CustomerReviews", fields: [customerId], references: [id])
+
+  @@map("reviews")
+}
 
 
 
