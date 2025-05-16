@@ -20,6 +20,8 @@ model User {
   lng            Float?
   profileImage  String?
   expirationOtp DateTime?
+  
+  
   otp           Int?
   password      String
   role          UserRole   @default(Customer)
@@ -169,6 +171,8 @@ model Payment {
 
   @@map("payments")
 }
+
+
 
 
 enum ProductStatus {
